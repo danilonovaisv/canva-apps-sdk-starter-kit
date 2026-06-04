@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 cp .env.local .env
-echo "✅ Ambiente local aplicado em .env"
+echo "Local environment applied to .env"
 cat .env

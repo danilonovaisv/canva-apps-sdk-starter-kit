@@ -1,5 +1,18 @@
 {
   "projects": {
-    "default": "portfolio-danilo-novais"
-  }
+    "default": "canva-app-5f36c"
+  },
+  "targets": {
+    "canva-app-5f36c": {
+      "hosting": {
+        "frontend": [
+          "canva-app-5f36c"
+        ],
+        "api": [
+          "portfoliodanilo-api"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

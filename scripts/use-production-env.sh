@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 cp .env.production .env
-echo "✅ Ambiente de produção aplicado em .env"
+echo "Production environment applied to .env"
 cat .env

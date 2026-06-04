@@ -7,7 +7,7 @@
   "scripts": {
     "start": "tsx ./scripts/start/start.ts",
     "start:preview": "npm run start -- --preview",
-    "extract": "formatjs extract \"src/**/*.{ts,tsx}\" --out-file dist/messages_en.json",
+    "extract": "formatjs extract \"src/**/*.{ts,tsx}\" --ignore \"src/**/*.d.ts\" --out-file dist/messages_en.json",
     "build": "webpack --config webpack.config.ts --mode production && npm run extract",
     "lint:types": "tsc",
     "lint": "eslint .",

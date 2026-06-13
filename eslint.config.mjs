@@ -4,6 +4,8 @@ export default [
   {
     ignores: [
       "**/node_modules/",
+      "functions/lib/",
+      "functions/.eslintrc.js",
       "**/dist",
       "**/*.d.ts",
       "**/*.d.tsx",

@@ -8,6 +8,7 @@ module.exports = {
   testRegex: "(/(tests|__tests__)/.*|(\\.|/)(tests))\\.tsx?$",
   modulePaths: [compilerOptions.baseUrl],
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths),
+  modulePathIgnorePatterns: ["<rootDir>/examples/"],
   transform: {
     ".+\\.(css)$": "<rootDir>/node_modules/jest-css-modules-transform",
     "^.+\\.tsx?$": [
@@ -16,7 +17,7 @@ module.exports = {
         astTransformers: {
           before: [
             {
-              path: "@formatjs/ts-transformer/ts-jest-integration",
+              path: "@formatjs/ts-transformer/ts-jest-integration.js",
               options: {
                 overrideIdFn: "[sha512:contenthash:base64:6]",
                 ast: true,

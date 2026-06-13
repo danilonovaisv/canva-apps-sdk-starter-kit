@@ -107,7 +107,9 @@ export const getImageGenerationJobStatus = async ({
       }
     } catch (error) {
       // Handle errors here
-      throw new Error(`Error while polling job status ${error}`);
+      throw new Error(`Error while polling job status ${error}`, {
+        cause: error,
+      });
     }
   }
 

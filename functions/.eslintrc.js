@@ -3,6 +3,7 @@ module.exports = {
   env: {
     es6: true,
     node: true,
+    commonjs: true,
   },
   extends: [
     "eslint:recommended",
@@ -18,8 +19,8 @@ module.exports = {
     sourceType: "module",
   },
   ignorePatterns: [
-    "/lib/**/*", // Ignore built files.
-    "/generated/**/*", // Ignore generated files.
+    "/lib/**/*",
+    "/generated/**/*",
   ],
   plugins: [
     "@typescript-eslint",

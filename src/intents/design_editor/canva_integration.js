@@ -5,12 +5,7 @@
  * =========================================================================
  */
 
-import {
-  addPage,
-  addElementAtPoint,
-  initAppElement,
-  createRichtextRange,
-} from "@canva/design";
+import { addPage, initAppElement } from "@canva/design";
 
 /**
  * -------------------------------------------------------------------------
@@ -448,7 +443,7 @@ export async function addLongTablePage({ title, intro, items }) {
     });
 
     // Left Accent indicator border
-    let leftBorderColor = undefined;
+    let leftBorderColor;
     if (item.tag === "essencial") leftBorderColor = BRAND_TOKENS.AZUL_SUAVE;
     else if (item.tag === "alugar") leftBorderColor = BRAND_TOKENS.CINZA_QUENTE;
     else if (item.tag === "dica") leftBorderColor = BRAND_TOKENS.DOURADO;
@@ -541,7 +536,7 @@ export async function addLongTablePage({ title, intro, items }) {
   await addPage({
     title: title || "Lista de Enxoval",
     background: { color: pageBg },
-    elements: elements,
+    elements,
   });
 }
 
@@ -786,6 +781,6 @@ export async function addPremiumPartnerSlide({
     title: `${partnerName} Premium Slide`,
     background: { color: pageBg },
     dimensions: { width: 1920, height: 1080 },
-    elements: elements,
+    elements,
   });
 }

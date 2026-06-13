@@ -1,0 +1,119 @@
+"use strict"
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: Object.getOwnPropertyDescriptor(all, name).get
+    });
+}
+_export(exports, {
+    get EaselFlagsProvider () {
+        return EaselFlagsProvider;
+    },
+    get EaselHighContrastOverrideProvider () {
+        return EaselHighContrastOverrideProvider;
+    },
+    get useEaselFlags () {
+        return useEaselFlags;
+    },
+    get useEaselFlagsSideEffect () {
+        return useEaselFlagsSideEffect;
+    }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _use_isomorphic_layout_effect = require('../../../../base/react/use_isomorphic_layout_effect');
+const _react = _interop_require_wildcard(require("react"));
+const _flag_definitions = require("./flag_definitions");
+function _getRequireWildcardCache(nodeInterop) {
+    if (typeof WeakMap !== "function") return null;
+    var cacheBabelInterop = new WeakMap();
+    var cacheNodeInterop = new WeakMap();
+    return (_getRequireWildcardCache = function(nodeInterop) {
+        return nodeInterop ? cacheNodeInterop : cacheBabelInterop;
+    })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+    if (!nodeInterop && obj && obj.__esModule) {
+        return obj;
+    }
+    if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+        return {
+            default: obj
+        };
+    }
+    var cache = _getRequireWildcardCache(nodeInterop);
+    if (cache && cache.has(obj)) {
+        return cache.get(obj);
+    }
+    var newObj = {
+        __proto__: null
+    };
+    var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+    for(var key in obj){
+        if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) {
+            var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+            if (desc && (desc.get || desc.set)) {
+                Object.defineProperty(newObj, key, desc);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+    }
+    newObj.default = obj;
+    if (cache) {
+        cache.set(obj, newObj);
+    }
+    return newObj;
+}
+const FlagsContext = _react.createContext(getFlagValues());
+function EaselFlagsProvider({ overrides, children }) {
+    const value = useMergedFlags(getFlagValues(), overrides);
+    return (0, _jsxruntime.jsx)(FlagsContext, {
+        value: value,
+        children: children
+    });
+}
+function useEaselFlags() {
+    return _react.useContext(FlagsContext);
+}
+function useEaselFlagsSideEffect() {
+    const currentFlags = useEaselFlags();
+    (0, _use_isomorphic_layout_effect.useIsomorphicLayoutEffect)(()=>{
+        for (const [name, flag] of Object.entries(_flag_definitions.flags))if (flag.className) {
+            const enabled = currentFlags[name];
+            document.documentElement.classList.toggle(stripGlobal(flag.className), enabled);
+        }
+    }, [
+        currentFlags
+    ]);
+}
+function useMergedFlags(flags, overrides = {}) {
+    const overrideEntries = Object.entries(overrides).filter(([_, v])=>v !== undefined);
+    const mergedFlags = {
+        ...flags,
+        ...Object.fromEntries(overrideEntries)
+    };
+    const dependencies = Object.entries(mergedFlags).flat();
+    return _react.useMemo(()=>mergedFlags, dependencies);
+}
+function getFlagValues() {
+    return Object.fromEntries(Object.entries(_flag_definitions.flags).map(([name, flag])=>[
+            name,
+            flag.value
+        ]));
+}
+function EaselHighContrastOverrideProvider({ children }) {
+    const currentFlags = useEaselFlags();
+    const value = useMergedFlags(currentFlags, {
+        enableHighContrastOverride: true
+    });
+    return (0, _jsxruntime.jsx)(FlagsContext, {
+        value: value,
+        children: children
+    });
+}
+function stripGlobal(className) {
+    return className?.replace(/^\s*:global\(\.(.+?)\)\s*$/, '$1') ?? '';
+}

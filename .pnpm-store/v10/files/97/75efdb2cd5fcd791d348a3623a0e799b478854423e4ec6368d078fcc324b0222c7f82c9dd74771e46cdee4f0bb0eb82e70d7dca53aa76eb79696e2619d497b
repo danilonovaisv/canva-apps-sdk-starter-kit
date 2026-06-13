@@ -1,0 +1,4 @@
+export const exposeTestIds = false;
+export function createTestIdsObject() {
+    return {};
+}

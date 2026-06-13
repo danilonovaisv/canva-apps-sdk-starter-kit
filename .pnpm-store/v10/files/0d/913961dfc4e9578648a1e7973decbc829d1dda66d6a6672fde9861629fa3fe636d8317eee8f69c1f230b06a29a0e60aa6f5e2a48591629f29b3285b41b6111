@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { elevationSurfaceFloatingShadow: "var(--JF44pw)", elevationSurfaceRaisedShadow: "var(--galhog)", elevationSurfaceRestingShadow: "var(--a5p9-A)", surfaceFloating: "DcvVJA", surfaceRaised: "PJngaA", surfaceResting: "Pp_zlA" };
+export default styles;
+export const customProperties = { elevationSurfaceFloatingShadow: "--JF44pw", elevationSurfaceRaisedShadow: "--galhog", elevationSurfaceRestingShadow: "--a5p9-A" };
+const dictStyles = { "elevationSurfaceFloatingShadow": "var(--JF44pw)", "elevationSurfaceRaisedShadow": "var(--galhog)", "elevationSurfaceRestingShadow": "var(--a5p9-A)", "surfaceFloating": "DcvVJA", "surfaceRaised": "PJngaA", "surfaceResting": "Pp_zlA" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

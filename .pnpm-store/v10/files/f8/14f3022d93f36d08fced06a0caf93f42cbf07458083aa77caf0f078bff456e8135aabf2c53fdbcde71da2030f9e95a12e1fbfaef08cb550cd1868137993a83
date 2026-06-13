@@ -1,0 +1,98 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { UnreachableError } from '../../../../base/preconditions';
+import classNames from 'classnames';
+import * as React from 'react';
+import { useEnableAnimations } from '../../provider/provider';
+import { useThemedMedia } from '../../theme/escape_hatch';
+import { applyBrandGradient } from './gradient';
+import styles, { getStyle } from './icons.css';
+import { ensureUniqueIds } from './unique_ids';
+export const iconSizes = ['tiny', 'small', 'medium', 'large'];
+export const iconTones = ['primary', 'secondary', 'tertiary', 'positive', 'critical', 'gradientBrand'];
+export const storybookMetadata = new WeakMap();
+export function createIcon(
+  glyphs,
+  {
+    extraClassName,
+    followDirection,
+    defaultSize = 'medium',
+    spinning,
+    themed
+  } = {}
+) {
+  const useGlyphsForTheme = themed ? () => useThemedMedia(themed) : () => ({});
+  const Component = ({
+    className,
+    size = defaultSize,
+    tone: toneProp,
+    style
+  }) => {
+    const tone = themed ? 'primary' : toneProp;
+    const id = React.useId();
+    const enableAnimations = useEnableAnimations();
+    const resolvedGlyphs = {
+      ...glyphs,
+      ...useGlyphsForTheme()
+    };
+    const [glyph, sizeClassName] = getGlyphAndClassForSize(size, resolvedGlyphs);
+    const classes = classNames(className, sizeClassName, extraClassName, tone && tone !== 'gradientBrand' ? getStyle(tone) : undefined, enableAnimations && spinning ? styles.spinning : undefined, {
+      [styles.followDirection]: followDirection
+    });
+    const {
+      children,
+      innerHtml
+    } = React.useMemo(() => {
+      if (typeof glyph === 'function') {
+        const GlyphComponent = glyph;
+        return {
+          children: _jsx(GlyphComponent, {}),
+          innerHtml: undefined
+        };
+      }
+      if (typeof glyph !== 'string') return {
+        children: null,
+        innerHtml: undefined
+      };
+      let svg = ensureUniqueIds(tone === 'gradientBrand' ? applyBrandGradient(glyph) : glyph, id);
+      if (!enableAnimations) svg = mangleEmbeddedAnimations(svg);
+      return {
+        children: null,
+        innerHtml: {
+          __html: svg
+        }
+      };
+    }, [glyph, tone, id, enableAnimations]);
+    return _jsx("span", {
+      "aria-hidden": "true",
+      className: classes,
+      style: style,
+      dangerouslySetInnerHTML: innerHtml,
+      children: children
+    });
+  };
+  storybookMetadata.set(Component, {
+    glyphs,
+    followDirection
+  });
+  return Component;
+}
+export function getGlyphAndClassForSize(size, glyphs) {
+  const fallbackGlyph = glyphs.medium || glyphs.small || glyphs.large || glyphs.tiny;
+  switch (size) {
+    case 'tiny':
+      return [glyphs.tiny || fallbackGlyph, styles.tiny];
+    case 'small':
+      return [glyphs.small || fallbackGlyph, styles.small];
+    case 'medium':
+      return [glyphs.medium || fallbackGlyph, styles.medium];
+    case 'large':
+      return [glyphs.large || fallbackGlyph, styles.large];
+    default:
+      throw new UnreachableError(size);
+  }
+}
+function mangleEmbeddedAnimations(svg) {
+  return svg
+  .replaceAll(/@keyframes\b/g, '@disabled--keyframes')
+  .replaceAll(/<animate/g, '<disabled--animate');
+}

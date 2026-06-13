@@ -1,0 +1,169 @@
+"use strict"
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function _export(target, all) {
+  for (var name in all) Object.defineProperty(target, name, {
+    enumerable: true,
+    get: Object.getOwnPropertyDescriptor(all, name).get
+  });
+}
+_export(exports, {
+  get createIcon() {
+    return createIcon;
+  },
+  get getGlyphAndClassForSize() {
+    return getGlyphAndClassForSize;
+  },
+  get iconSizes() {
+    return iconSizes;
+  },
+  get iconTones() {
+    return iconTones;
+  },
+  get storybookMetadata() {
+    return storybookMetadata;
+  }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _preconditions = require('../../../../base/preconditions');
+const _classnames = _interop_require_default(require("classnames"));
+const _react = _interop_require_wildcard(require("react"));
+const _provider = require('../../provider/provider');
+const _escape_hatch = require('../../theme/escape_hatch');
+const _gradient = require("./gradient");
+const _iconscss = _interop_require_wildcard(require("./icons.css"));
+const _unique_ids = require("./unique_ids");
+function _interop_require_default(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+function _getRequireWildcardCache(nodeInterop) {
+  if (typeof WeakMap !== "function") return null;
+  var cacheBabelInterop = new WeakMap();
+  var cacheNodeInterop = new WeakMap();
+  return (_getRequireWildcardCache = function (nodeInterop) {
+    return nodeInterop ? cacheNodeInterop : cacheBabelInterop;
+  })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+  if (!nodeInterop && obj && obj.__esModule) {
+    return obj;
+  }
+  if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+    return {
+      default: obj
+    };
+  }
+  var cache = _getRequireWildcardCache(nodeInterop);
+  if (cache && cache.has(obj)) {
+    return cache.get(obj);
+  }
+  var newObj = {
+    __proto__: null
+  };
+  var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+  for (var key in obj) {
+    if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) {
+      var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+      if (desc && (desc.get || desc.set)) {
+        Object.defineProperty(newObj, key, desc);
+      } else {
+        newObj[key] = obj[key];
+      }
+    }
+  }
+  newObj.default = obj;
+  if (cache) {
+    cache.set(obj, newObj);
+  }
+  return newObj;
+}
+const iconSizes = ['tiny', 'small', 'medium', 'large'];
+const iconTones = ['primary', 'secondary', 'tertiary', 'positive', 'critical', 'gradientBrand'];
+const storybookMetadata = new WeakMap();
+function createIcon(glyphs, {
+  extraClassName,
+  followDirection,
+  defaultSize = 'medium',
+  spinning,
+  themed
+} = {}) {
+  const useGlyphsForTheme = themed ? () => (0, _escape_hatch.useThemedMedia)(themed) : () => ({});
+  const Component = ({
+    className,
+    size = defaultSize,
+    tone: toneProp,
+    style
+  }) => {
+    const tone = themed ? 'primary' : toneProp;
+    const id = _react.useId();
+    const enableAnimations = (0, _provider.useEnableAnimations)();
+    const resolvedGlyphs = {
+      ...glyphs,
+      ...useGlyphsForTheme()
+    };
+    const [glyph, sizeClassName] = getGlyphAndClassForSize(size, resolvedGlyphs);
+    const classes = (0, _classnames.default)(className, sizeClassName, extraClassName, tone && tone !== 'gradientBrand' ? (0, _iconscss.getStyle)(tone) : undefined, enableAnimations && spinning ? _iconscss.default.spinning : undefined, {
+      [_iconscss.default.followDirection]: followDirection
+    });
+    const {
+      children,
+      innerHtml
+    } = _react.useMemo(() => {
+      if (typeof glyph === 'function') {
+        const GlyphComponent = glyph;
+        return {
+          children: (0, _jsxruntime.jsx)(GlyphComponent, {}),
+          innerHtml: undefined
+        };
+      }
+      if (typeof glyph !== 'string') return {
+        children: null,
+        innerHtml: undefined
+      };
+      let svg = (0, _unique_ids.ensureUniqueIds)(tone === 'gradientBrand' ? (0, _gradient.applyBrandGradient)(glyph) : glyph, id);
+      if (!enableAnimations) svg = mangleEmbeddedAnimations(svg);
+      return {
+        children: null,
+        innerHtml: {
+          __html: svg
+        }
+      };
+    }, [glyph, tone, id, enableAnimations]);
+    return (0, _jsxruntime.jsx)("span", {
+      "aria-hidden": "true",
+      className: classes,
+      style: style,
+      dangerouslySetInnerHTML: innerHtml,
+      children: children
+    });
+  };
+  storybookMetadata.set(Component, {
+    glyphs,
+    followDirection
+  });
+  return Component;
+}
+function getGlyphAndClassForSize(size, glyphs) {
+  const fallbackGlyph = glyphs.medium || glyphs.small || glyphs.large || glyphs.tiny;
+  switch (size) {
+    case 'tiny':
+      return [glyphs.tiny || fallbackGlyph, _iconscss.default.tiny];
+    case 'small':
+      return [glyphs.small || fallbackGlyph, _iconscss.default.small];
+    case 'medium':
+      return [glyphs.medium || fallbackGlyph, _iconscss.default.medium];
+    case 'large':
+      return [glyphs.large || fallbackGlyph, _iconscss.default.large];
+    default:
+      throw new _preconditions.UnreachableError(size);
+  }
+}
+function mangleEmbeddedAnimations(svg) {
+  return svg
+  .replaceAll(/@keyframes\b/g, '@disabled--keyframes')
+  .replaceAll(/<animate/g, '<disabled--animate');
+}

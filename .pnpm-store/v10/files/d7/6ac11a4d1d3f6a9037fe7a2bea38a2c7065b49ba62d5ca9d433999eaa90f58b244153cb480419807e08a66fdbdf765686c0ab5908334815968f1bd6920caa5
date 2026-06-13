@@ -1,0 +1,16 @@
+declare const BUBBLE_STYLES: string[];
+type Bubble = {
+    start: number
+    position: number
+    type: number
+    swap: boolean
+};
+export type { Bubble };
+export { BUBBLE_STYLES };
+export declare function useBubbles(
+    { value, trackWidth, enabled, }: {
+        value: number
+        trackWidth: number
+        enabled: boolean
+    }
+): Bubble[];

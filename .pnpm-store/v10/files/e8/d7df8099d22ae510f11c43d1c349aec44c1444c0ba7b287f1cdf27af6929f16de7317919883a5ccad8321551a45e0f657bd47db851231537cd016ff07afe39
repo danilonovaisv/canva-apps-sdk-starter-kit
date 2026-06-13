@@ -1,0 +1,9 @@
+import * as React from 'react';
+export type UseResizeResult = {
+    resizeContainerRef: React.RefObject<HTMLDivElement | null>
+    resizeHandleRef: React.RefCallback<HTMLDivElement>
+};
+export type UseResizeOptions = {
+    minHeightPx?: number;
+};
+export declare function useResize({ minHeightPx, }?: UseResizeOptions): UseResizeResult;

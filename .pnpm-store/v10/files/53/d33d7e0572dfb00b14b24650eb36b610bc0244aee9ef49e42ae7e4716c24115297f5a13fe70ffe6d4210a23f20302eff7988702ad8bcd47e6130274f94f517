@@ -1,0 +1,5 @@
+import * as React from 'react';
+import type { ButtonProps } from '../../button/button';
+export type ProgressBarActionButtonProps = Omit<ButtonProps, 'icon' | 'variant'>;
+export declare const ProgressCancelButton: (props: ProgressBarActionButtonProps) => React.JSX.Element;
+export declare const ProgressRetryButton: (props: ProgressBarActionButtonProps) => React.JSX.Element;

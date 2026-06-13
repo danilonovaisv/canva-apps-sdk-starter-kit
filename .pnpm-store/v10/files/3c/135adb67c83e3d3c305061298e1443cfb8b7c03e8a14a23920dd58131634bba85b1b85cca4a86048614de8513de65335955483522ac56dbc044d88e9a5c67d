@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { colorUiBorder: "var(--enMi_w)", lineWidth: "var(--Ahvyaw, 1px)", dividerInset: "var(--Z92Iyg, 0px)", dividerSpacing: "var(--Mo80Gw, 0px)", divider: "_PhRSQ", vertical: "AOEsjQ", borderWidth200: "TpA0iQ" };
+export default styles;
+export const customProperties = { colorUiBorder: "--enMi_w", lineWidth: "--Ahvyaw", dividerInset: "--Z92Iyg", dividerSpacing: "--Mo80Gw" };
+const dictStyles = { "colorUiBorder": "var(--enMi_w)", "lineWidth": "var(--Ahvyaw, 1px)", "dividerInset": "var(--Z92Iyg, 0px)", "dividerSpacing": "var(--Mo80Gw, 0px)", "divider": "_PhRSQ", "vertical": "AOEsjQ", "borderWidth200": "TpA0iQ" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

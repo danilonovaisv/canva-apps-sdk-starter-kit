@@ -1,0 +1,32 @@
+"use strict"
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "FakeMonetizationClient", {
+    enumerable: true,
+    get: function() {
+        return FakeMonetizationClient;
+    }
+});
+class FakeMonetizationClient {
+    async isEnabled(action) {
+        await this.delay();
+        return true;
+    }
+    async openTrackingSession(opts) {
+        await this.delay();
+        return {
+            id: 'id',
+            closeTrackingSession: async ()=>{}
+        };
+    }
+    async requestEnableBillableAction(action) {
+        await this.delay();
+        return {
+            status: 'granted'
+        };
+    }
+    constructor(delay){
+        this.delay = delay;
+    }
+}

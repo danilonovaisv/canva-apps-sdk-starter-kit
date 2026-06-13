@@ -1,0 +1,36 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import 'react';
+import { CircleButtonWithLabel, CircleButtonWithoutLabel, InternalAnchor, InternalButton } from './internal_button';
+export function Button(props) {
+    return _jsx(InternalButton, {
+        ...props
+    });
+}
+export function ButtonLink(props) {
+    return _jsx(InternalAnchor, {
+        ...props
+    });
+}
+export function BasicButton(props) {
+    return _jsx(InternalButton, {
+        ...props,
+        variant: "basic"
+    });
+}
+export function BasicButtonLink(props) {
+    return _jsx(InternalAnchor, {
+        ...props,
+        variant: "basic"
+    });
+}
+function isCircleButtonWithChildren(props) {
+    return typeof props.children !== 'undefined';
+}
+export function CircleButton(props) {
+    if (isCircleButtonWithChildren(props)) return _jsx(CircleButtonWithLabel, {
+        ...props
+    });
+    return _jsx(CircleButtonWithoutLabel, {
+        ...props
+    });
+}

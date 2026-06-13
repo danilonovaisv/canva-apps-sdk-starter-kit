@@ -1,0 +1,140 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { toCallbackRef } from '../../../../../base/react/callback_ref';
+import { composeRefs } from '../../../../../base/react/compose_refs';
+import { useIsomorphicLayoutEffect } from '../../../../../base/react/use_isomorphic_layout_effect';
+import classNames from 'classnames';
+import * as React from 'react';
+import ResizeObserver from 'resize-observer-polyfill';
+import { useInputWrapperContext } from '../../base_input/base_input';
+import inputStyles from '../../base_input/temporary_exports.css';
+import styles from './multiline_input.css';
+const DEFAULT_BUFFER_ROWS = 1;
+const DEFAULT_MAX_ROWS = Number.POSITIVE_INFINITY;
+function useAutoGrow(
+    { bufferRows = DEFAULT_BUFFER_ROWS, maxRows = DEFAULT_MAX_ROWS, minRows = 1, value }
+) {
+    const innerRef = React.useRef(null);
+    const [rows, setRows] = React.useState();
+    const remeasure = React.useCallback(()=>{
+        const refElement = innerRef.current;
+        if (!refElement) return;
+        const rowHeight = refElement.clientHeight;
+        const contentRows = rowHeight === 0 ? 0 : Math.round(refElement.scrollHeight / rowHeight);
+        const rows = Math.min(maxRows, Math.max(minRows + bufferRows, contentRows + bufferRows));
+        setRows(rows);
+    }, [
+        bufferRows,
+        maxRows,
+        minRows
+    ]);
+    useIsomorphicLayoutEffect(remeasure, [
+        remeasure,
+        value
+    ]);
+    const stableRemeasure = React.useRef(remeasure);
+    useIsomorphicLayoutEffect(()=>{
+        stableRemeasure.current = remeasure;
+    }, [
+        remeasure
+    ]);
+    const observerRef = React.useRef(null);
+    const setRef = React.useCallback((element)=>{
+        if (observerRef.current == null)
+            observerRef.current = new ResizeObserver(()=>stableRemeasure.current());
+        if (innerRef.current != null)
+            observerRef.current.unobserve(innerRef.current);
+        innerRef.current = element;
+        if (innerRef.current != null) observerRef.current.observe(innerRef.current);
+    }, []);
+    React.useEffect(()=>{
+        return ()=>observerRef.current?.disconnect();
+    }, []);
+    return {
+        ref: setRef,
+        rows
+    };
+}
+export const MultilineInputField = ({ ref, ...props })=>{
+    const { onFocus: onFocusProp, onBlur: onBlurProp, onChangeComplete: onChangeCompleteProp, onKeyDown: onKeyDownProp, onRowsChange: onRowsChangeProp, dir = 'auto', autoGrow, value } = props;
+    const { ref: autoGrowRef, rows } = useAutoGrow({
+        ...props,
+        value
+    });
+    const { setFocused, inputRef, disabled, error } = useInputWrapperContext();
+    const onFocus = React.useCallback((e)=>{
+        onFocusProp?.(e);
+        setFocused(true);
+    }, [
+        onFocusProp,
+        setFocused
+    ]);
+    const onBlur = React.useCallback((e)=>{
+        onBlurProp?.(e);
+        onChangeCompleteProp?.(e.target.value);
+        setFocused(false);
+    }, [
+        onBlurProp,
+        onChangeCompleteProp,
+        setFocused
+    ]);
+    const onKeyDown = React.useCallback((e)=>{
+        if (e.keyCode === 229) {
+            e.stopPropagation();
+            return;
+        }
+        onKeyDownProp?.(e);
+    }, [
+        onKeyDownProp
+    ]);
+    React.useEffect(()=>{
+        if (!autoGrow || onRowsChangeProp == null) return;
+        rows !== undefined && onRowsChangeProp?.(rows);
+    }, [
+        rows,
+        autoGrow,
+        onRowsChangeProp
+    ]);
+    const inputClassName = classNames(inputStyles.textField, props.className);
+    return _jsxs("div", {
+        className: styles.textFieldContainer,
+        children: [
+            _jsx("textarea", {
+                className: inputClassName,
+                value: value,
+                onChange: props.onChange,
+                onFocus: onFocus,
+                onBlur: onBlur,
+                onKeyPress: props.onKeyPress,
+                onKeyDown: onKeyDown,
+                onKeyUp: props.onKeyUp,
+                onPaste: props.onPaste,
+                onClick: props.onClick,
+                ref: toCallbackRef(composeRefs(inputRef, ref)),
+                dir: dir,
+                autoComplete: props.autoComplete,
+                disabled: disabled,
+                placeholder: props.placeholder,
+                maxLength: props.maxLength,
+                lang: props.lang,
+                rows: rows ?? props.minRows,
+                id: props.id,
+                "aria-label": props.ariaLabel,
+                "aria-labelledby": props.ariaLabelledBy,
+                "aria-describedby": props.ariaDescribedBy,
+                "aria-invalid": error || undefined,
+                required: props.required,
+                readOnly: props.readOnly,
+                "data-testid": props.testId
+            }),
+            autoGrow && _jsx("textarea", {
+                "aria-hidden": "true",
+                className: classNames(inputClassName, styles.hiddenInput),
+                dir: dir,
+                ref: autoGrowRef,
+                readOnly: true,
+                rows: 1,
+                value: value
+            })
+        ]
+    });
+};

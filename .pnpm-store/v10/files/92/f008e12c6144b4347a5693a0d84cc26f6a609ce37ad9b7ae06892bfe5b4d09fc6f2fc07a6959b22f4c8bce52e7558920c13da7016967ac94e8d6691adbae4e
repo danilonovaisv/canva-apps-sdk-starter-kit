@@ -1,0 +1,6 @@
+import * as React from 'react';
+export type DismissAreaProps = {
+    onClick: () => void
+    className?: string
+};
+export declare function DismissArea({ onClick, className }: DismissAreaProps): React.ReactNode;

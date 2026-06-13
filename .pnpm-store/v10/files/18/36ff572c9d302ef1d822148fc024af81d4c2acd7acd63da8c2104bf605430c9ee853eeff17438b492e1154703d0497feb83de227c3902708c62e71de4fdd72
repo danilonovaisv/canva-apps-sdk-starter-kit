@@ -1,0 +1,17 @@
+import { fileURLToPath as _furl } from "node:url";
+import { dirname as _dname } from "node:path";
+_dname(_furl(import.meta.url));
+import { t as parseScript } from "./formatjs";
+import { parseFile as parseFile$1 } from "./hbs_extractor-DC74dtk6.js";
+import { Preprocessor } from "content-tag";
+//#region packages/cli-lib/gts_extractor.ts
+let p = new Preprocessor();
+function parseFile(source, fileName, options) {
+	parseScript(options, fileName)(p.process(source, { filename: fileName }).code);
+	const parseResult = p.parse(source, { filename: fileName });
+	for (let parsed of parseResult) parseFile$1(parsed.contents, fileName, options);
+}
+//#endregion
+export { parseFile };
+
+//# sourceMappingURL=gts_extractor-Dk_HfFGZ.js.map

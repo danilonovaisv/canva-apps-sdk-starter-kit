@@ -1,0 +1,3 @@
+export declare const exposeTestIds: boolean;
+export type TestIdsObject<K extends string> = Record<K, string>;
+export declare function createTestIdsObject<K extends string>(): TestIdsObject<K>;

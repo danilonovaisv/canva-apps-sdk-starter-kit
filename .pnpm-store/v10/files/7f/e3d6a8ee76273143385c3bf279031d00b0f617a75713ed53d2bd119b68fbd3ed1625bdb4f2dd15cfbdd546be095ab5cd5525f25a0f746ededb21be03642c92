@@ -1,0 +1,86 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import * as React from 'react';
+import { Box } from '../../box/box';
+import { AdaptivePopover } from '../../surface/popover/popover';
+import { AddColorButton } from '../../swatch/swatch';
+import { ColorPicker } from './color_picker';
+export const ColorPickerPopover = ({ trigger, color, alpha, ariaLabel, ariaLabelledBy, onChange, onChangeStart, onChangeComplete, onStartEyedropper, onOpen, onClose, onDeleteColor, header, body, footer, width })=>{
+    const [open, setOpen] = React.useState(false);
+    const togglePopover = React.useCallback(()=>{
+        if (open)
+            onClose?.();
+        else
+            onOpen?.();
+        setOpen((prev)=>!prev);
+    }, [
+        open,
+        onOpen,
+        onClose,
+        setOpen
+    ]);
+    const closePopover = React.useCallback(()=>{
+        onClose?.();
+        setOpen(false);
+    }, [
+        onClose,
+        setOpen
+    ]);
+    const triggerId = React.useId();
+    return _jsx(StatelessColorPickerPopover, {
+        trigger: trigger,
+        open: open,
+        id: triggerId,
+        onClick: togglePopover,
+        onRequestClose: closePopover,
+        ariaLabel: ariaLabel,
+        ariaLabelledBy: ariaLabelledBy,
+        color: color,
+        alpha: alpha,
+        onChange: onChange,
+        onChangeStart: onChangeStart,
+        onChangeComplete: onChangeComplete,
+        onStartEyedropper: onStartEyedropper,
+        onDeleteColor: onDeleteColor,
+        header: header,
+        body: body,
+        footer: footer,
+        width: width
+    });
+};
+export function StatelessColorPickerPopover(props) {
+    const { trigger = (props)=> _jsx(AddColorButton, {
+            size: "small",
+            ...props
+        }), open, id, ariaLabel, ariaLabelledBy, color, alpha, onClick, onRequestClose, onChange, onChangeStart, onChangeComplete, onStartEyedropper, onDeleteColor, header, body, footer, width = '40u' } = props;
+    return _jsx(AdaptivePopover, {
+        role: "dialog",
+        ariaLabelledBy: id,
+        placement: "bottom-start",
+        open: open,
+        onRequestClose: onRequestClose,
+        captureFocus: true,
+        width: width,
+        trigger: typeof trigger === 'function' ? (triggerProps)=>trigger({
+                id,
+                ariaLabel,
+                ariaLabelledBy,
+                onClick,
+                ...triggerProps
+            }) : trigger,
+        children: _jsx(Box, {
+            padding: "2u",
+            children: _jsx(ColorPicker, {
+                color: color,
+                alpha: alpha,
+                onChange: onChange,
+                onChangeStart: onChangeStart,
+                onChangeComplete: onChangeComplete,
+                onStartEyedropper: onStartEyedropper,
+                onDeleteColor: onDeleteColor,
+                header: header,
+                body: body,
+                footer: footer
+            })
+        })
+    });
+}

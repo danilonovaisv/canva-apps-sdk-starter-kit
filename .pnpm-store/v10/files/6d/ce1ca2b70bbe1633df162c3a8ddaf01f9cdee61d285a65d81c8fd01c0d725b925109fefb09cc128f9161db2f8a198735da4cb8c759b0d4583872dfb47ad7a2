@@ -1,0 +1,11 @@
+export class FakeAutofillClient {
+    async requestAutofillDesign(opts) {
+        await this.delay();
+        return {
+            status: 'success'
+        };
+    }
+    constructor(delay){
+        this.delay = delay;
+    }
+}

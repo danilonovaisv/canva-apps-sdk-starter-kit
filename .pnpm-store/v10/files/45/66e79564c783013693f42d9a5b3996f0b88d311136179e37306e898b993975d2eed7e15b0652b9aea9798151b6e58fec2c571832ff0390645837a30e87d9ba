@@ -1,0 +1,2 @@
+import type { TestIdsObject } from '../../../test_ids/test_ids';
+export declare const BaseSelectTestIds: TestIdsObject<'triggerContainer' | 'menuContainer'>;

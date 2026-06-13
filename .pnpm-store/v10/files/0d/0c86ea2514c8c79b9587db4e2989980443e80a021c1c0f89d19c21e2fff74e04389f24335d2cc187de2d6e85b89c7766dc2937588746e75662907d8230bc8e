@@ -1,0 +1,12 @@
+import debug from "debug";
+/**
+ * Shared debug logger for the app middleware package.
+ * Enable with DEBUG=canva:app:middleware
+ */
+export declare const debugLogger: debug.Debugger;
+/** Default Canva API base URL */
+export declare const CANVA_BASE_URL = "https://api.canva.com";
+/** Default JWKS cache duration in minutes */
+export declare const DEFAULT_CACHE_MAX_AGE_MINUTES = 60;
+/** Default JWKS fetch timeout in milliseconds */
+export declare const DEFAULT_TIMEOUT_MS = 30000;

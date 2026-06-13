@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { dismissArea: "U_F_wQ" };
+export default styles;
+export const customProperties = {};
+const dictStyles = { "dismissArea": "U_F_wQ" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

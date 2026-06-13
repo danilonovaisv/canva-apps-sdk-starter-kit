@@ -1,0 +1,29 @@
+import * as React from 'react';
+import styles from './progress_bar_indicator.css';
+export function useProgressAnimationEnd({ value, onProgressAnimationEnd }) {
+    const handledRef = React.useRef(false);
+    const timeoutRef = React.useRef(0);
+    const onTransitionEnd = React.useCallback(()=>{
+        window.clearTimeout(timeoutRef.current);
+        if (!handledRef.current) {
+            handledRef.current = true;
+            onProgressAnimationEnd?.(value);
+        }
+    }, [
+        onProgressAnimationEnd,
+        value
+    ]);
+    React.useEffect(()=>{
+        handledRef.current = false;
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = window.setTimeout(onTransitionEnd, TRANSITION_END_TIMEOUT_MS);
+        return ()=>window.clearTimeout(timeoutRef.current);
+    }, [
+        value,
+        onTransitionEnd
+    ]);
+    return {
+        onTransitionEnd
+    };
+}
+export const TRANSITION_END_TIMEOUT_MS = parseInt(styles.widthTransitionDurationMs, 10) + 100 || 2000;

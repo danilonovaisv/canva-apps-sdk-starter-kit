@@ -1,0 +1,147 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "useSheetPositioner", {
+    enumerable: true,
+    get: function() {
+        return useSheetPositioner;
+    }
+});
+const _react = _interop_require_wildcard(require("react"));
+const _provider = require('../../../../provider/provider');
+function _getRequireWildcardCache(nodeInterop) {
+    if (typeof WeakMap !== "function") return null;
+    var cacheBabelInterop = new WeakMap();
+    var cacheNodeInterop = new WeakMap();
+    return (_getRequireWildcardCache = function(nodeInterop) {
+        return nodeInterop ? cacheNodeInterop : cacheBabelInterop;
+    })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+    if (!nodeInterop && obj && obj.__esModule) {
+        return obj;
+    }
+    if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+        return {
+            default: obj
+        };
+    }
+    var cache = _getRequireWildcardCache(nodeInterop);
+    if (cache && cache.has(obj)) {
+        return cache.get(obj);
+    }
+    var newObj = {
+        __proto__: null
+    };
+    var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+    for(var key in obj){
+        if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) {
+            var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+            if (desc && (desc.get || desc.set)) {
+                Object.defineProperty(newObj, key, desc);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+    }
+    newObj.default = obj;
+    if (cache) {
+        cache.set(obj, newObj);
+    }
+    return newObj;
+}
+const TRANSITION_SPEED = 0.5;
+const MAX_TRANSITION_DURATION_MS = 400;
+const MIN_FLIP_TRAVEL_PX = 5;
+const IDLE = {
+    type: 'idle'
+};
+function useSheetPositioner(enableAnimations) {
+    const shouldAnimate = (0, _provider.useEnableAnimations)() && enableAnimations;
+    const ref = _react.useRef(null);
+    const scheduleFrame = useFrameScheduler();
+    const [state, setState] = _react.useState(IDLE);
+    const setDragOffset = _react.useCallback((position)=>{
+        ref.current?.style.setProperty('transform', translateY(-position));
+    }, []);
+    const cancelSnap = _react.useCallback(()=>{
+        scheduleFrame(()=>{
+            if (ref.current) ref.current.style.transform = '';
+            setState(IDLE);
+        });
+    }, [
+        scheduleFrame
+    ]);
+    const handleSnap = _react.useCallback(()=>{
+        scheduleFrame(undefined);
+        const dragReleaseTop = ref.current?.getBoundingClientRect().top ?? 0;
+        setState({
+            type: 'snapping',
+            dragReleaseTop
+        });
+    }, [
+        scheduleFrame
+    ]);
+    _react.useLayoutEffect(()=>{
+        const el = ref.current;
+        if (state.type === 'idle' || !el) return;
+        el.style.transform = '';
+        if (!shouldAnimate) {
+            setState(IDLE);
+            return;
+        }
+        const getTopAndReflow = ()=>el.getBoundingClientRect().top;
+        const targetTop = getTopAndReflow();
+        const { dragReleaseTop } = state;
+        const diff = dragReleaseTop - targetTop;
+        if (Math.abs(diff) < MIN_FLIP_TRAVEL_PX) {
+            setState(IDLE);
+            return;
+        }
+        const transitionDuration = Math.min(Math.abs(diff) / TRANSITION_SPEED, MAX_TRANSITION_DURATION_MS);
+        el.style.minHeight = `200vh`;
+        const expandedTop = getTopAndReflow();
+        el.style.transform = translateY(dragReleaseTop - expandedTop);
+        getTopAndReflow();
+        el.style.transition = `transform ${transitionDuration}ms ease-in-out`;
+        el.style.transform = translateY(targetTop - expandedTop);
+        const cleanupTimerId = setTimeout(()=>setState(IDLE), transitionDuration);
+        return ()=>{
+            clearTimeout(cleanupTimerId);
+            el.style.transition = '';
+            el.style.minHeight = '';
+            el.style.transform = '';
+        };
+    }, [
+        state,
+        shouldAnimate
+    ]);
+    return {
+        handleSnap,
+        cancelSnap,
+        scheduleUpdate: scheduleFrame,
+        setDragOffset,
+        ref
+    };
+}
+function useFrameScheduler() {
+    const pendingFrameId = _react.useRef(null);
+    const scheduleFrame = _react.useCallback((callback)=>{
+        if (pendingFrameId.current != null) cancelAnimationFrame(pendingFrameId.current);
+        if (callback == null) return;
+        pendingFrameId.current = requestAnimationFrame(()=>{
+            pendingFrameId.current = null;
+            callback();
+        });
+    }, []);
+    _react.useEffect(()=>{
+        return ()=>{
+            scheduleFrame(undefined);
+        };
+    }, [
+        scheduleFrame
+    ]);
+    return scheduleFrame;
+}
+const translateY = (distancePx)=>`translateY(${distancePx}px)`;

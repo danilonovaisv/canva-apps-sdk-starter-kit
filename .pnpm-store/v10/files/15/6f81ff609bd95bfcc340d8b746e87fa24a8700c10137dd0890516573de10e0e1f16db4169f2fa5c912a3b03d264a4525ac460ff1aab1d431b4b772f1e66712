@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { largeUp: "(min-width: 1200px)", mediumUp: "(min-width: 900px)", smallUp: "(min-width: 600px)", xLargeUp: "(min-width: 1650px)", radiusNone: "0px", internalBorderRadius: "var(--iV2Xpg)", defaultBorderRadius: "var(--4FjUhQ)", smallUpBorderRadius: "var(--tlYjJg)", mediumUpBorderRadius: "var(--EcJIfQ)", largeUpBorderRadius: "var(--uTGg-Q)", xLargeUpBorderRadius: "var(--qHr4iw)", hasBorderRadius: "XxpeBg" };
+export default styles;
+export const customProperties = { internalBorderRadius: "--iV2Xpg", defaultBorderRadius: "--4FjUhQ", smallUpBorderRadius: "--tlYjJg", mediumUpBorderRadius: "--EcJIfQ", largeUpBorderRadius: "--uTGg-Q", xLargeUpBorderRadius: "--qHr4iw" };
+const dictStyles = { "largeUp": "(min-width: 1200px)", "mediumUp": "(min-width: 900px)", "smallUp": "(min-width: 600px)", "xLargeUp": "(min-width: 1650px)", "radiusNone": "0px", "internalBorderRadius": "var(--iV2Xpg)", "defaultBorderRadius": "var(--4FjUhQ)", "smallUpBorderRadius": "var(--tlYjJg)", "mediumUpBorderRadius": "var(--EcJIfQ)", "largeUpBorderRadius": "var(--uTGg-Q)", "xLargeUpBorderRadius": "var(--qHr4iw)", "hasBorderRadius": "XxpeBg" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

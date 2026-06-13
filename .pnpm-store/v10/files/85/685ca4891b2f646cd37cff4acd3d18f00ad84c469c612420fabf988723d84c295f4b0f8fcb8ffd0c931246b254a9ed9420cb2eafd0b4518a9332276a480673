@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customProperties = void 0;
+exports.getStyle = getStyle;
+function Struct() { }
+function Dict() { }
+const styles = { enableEaselModernisedTactility: ":global(.e1xwlg2w)", elevationActionRaised: "var(--A2-tbg)", elevationActionResting: "var(--gISI6g)", elevationSurfaceRaisedShadow: "var(--galhog)", restingShadow: "var(--yWxJPw, var(--galhog))", raisedShadow: "var(--Q1Vfrw, var(--galhog))", button: "PuABGQ", hideOutline: "vFBXLA", resting: "v5HZbw", raised: "QFw_oA" };
+exports.default = styles;
+exports.customProperties = { elevationActionRaised: "--A2-tbg", elevationActionResting: "--gISI6g", elevationSurfaceRaisedShadow: "--galhog", restingShadow: "--yWxJPw", raisedShadow: "--Q1Vfrw" };
+const dictStyles = { "enableEaselModernisedTactility": ":global(.e1xwlg2w)", "elevationActionRaised": "var(--A2-tbg)", "elevationActionResting": "var(--gISI6g)", "elevationSurfaceRaisedShadow": "var(--galhog)", "restingShadow": "var(--yWxJPw, var(--galhog))", "raisedShadow": "var(--Q1Vfrw, var(--galhog))", "button": "PuABGQ", "hideOutline": "vFBXLA", "resting": "v5HZbw", "raised": "QFw_oA" };
+function getStyle(style) {
+    return dictStyles[style];
+}
+;

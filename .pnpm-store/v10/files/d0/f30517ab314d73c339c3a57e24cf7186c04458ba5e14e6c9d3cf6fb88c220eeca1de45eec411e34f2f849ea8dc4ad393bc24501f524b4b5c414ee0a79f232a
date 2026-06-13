@@ -1,0 +1,36 @@
+export declare const enum TicksPerSecond {
+    MICROSECOND = 1000000,
+    FLICK = 705600000
+}
+export declare const MS_PER_SEC = 1000;
+export declare const NS_PER_US = 1000;
+export declare const NS_PER_MS = 1000000;
+export declare const NS_PER_SEC = 1000000000;
+export declare const US_PER_MS = 1000;
+export declare const SEC_PER_MIN = 60;
+export declare const SEC_PER_HOUR = 3600;
+export declare const SEC_PER_DAY = 86400;
+export interface TimeUnits {
+    days?: number;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    milliseconds?: number;
+    microseconds?: number;
+    nanoseconds?: number;
+    flicks?: number;
+}
+export declare function isFlickLiteral(input: TimeUnits): input is {
+    flicks: number;
+};
+export declare function validateFlickLiteral(
+ input: {
+     flicks: number;
+ }
+): number;
+export declare function assertFiniteScalar(scalar: number): void;
+export declare function divToSafeNumber(numerator: bigint, denom: bigint): number;
+export declare function rescale(value: number, srcTicksPerSecond: number, dstTicksPerSecond: number): number;
+export declare function unitsToTicks(input: TimeUnits, ticksPerSecond: number): number;
+export declare function unitsToBigIntNs(input: TimeUnits): bigint;
+export declare function formatDurationUs(us: number): string;

@@ -1,0 +1,140 @@
+export const TicksPerSecond = {
+  MICROSECOND: 1000000,
+  FLICK: 705600000
+};
+export const MS_PER_SEC = 1000;
+export const NS_PER_US = 1000;
+export const NS_PER_MS = 1000000;
+export const NS_PER_SEC = 1000000000;
+export const US_PER_MS = 1000;
+export const SEC_PER_MIN = 60;
+export const SEC_PER_HOUR = 3600;
+export const SEC_PER_DAY = 86400;
+export function isFlickLiteral(input) {
+  const {
+    flicks,
+    ...rest
+  } = input;
+  return flicks !== undefined && Object.values(rest).every(v => v === undefined);
+}
+export function validateFlickLiteral(input) {
+  const {
+    flicks
+  } = input;
+  if (!Number.isFinite(flicks)) throw new RangeError(`flicks must be finite, got ${flicks}`);
+  if (!Number.isSafeInteger(flicks)) throw new RangeError(`flicks must be a safe integer, got ${flicks}`);
+  return flicks;
+}
+export function assertFiniteScalar(scalar) {
+  if (!Number.isFinite(scalar)) throw new RangeError(`Scalar must be finite, got ${scalar}`);
+}
+const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
+const MIN_SAFE = BigInt(Number.MIN_SAFE_INTEGER);
+export function divToSafeNumber(numerator, denom) {
+  const quotient = numerator / denom;
+  const remainder = numerator % denom;
+  const absRemainderX2 = (remainder < 0n ? -remainder : remainder) * 2n;
+  const isNegative = numerator < 0n;
+  const crossesHalf = isNegative ? absRemainderX2 > denom : absRemainderX2 >= denom;
+  const rounded = crossesHalf ? quotient + (isNegative ? -1n : 1n) : quotient;
+  if (rounded > MAX_SAFE || rounded < MIN_SAFE) throw new RangeError(`result ${rounded} exceeds safe integer range`);
+  return Number(rounded);
+}
+export function rescale(value, srcTicksPerSecond, dstTicksPerSecond) {
+  if (srcTicksPerSecond === dstTicksPerSecond) return value;
+  const numerator = BigInt(value) * BigInt(dstTicksPerSecond);
+  return divToSafeNumber(numerator, BigInt(srcTicksPerSecond));
+}
+function cascadeUnits(input) {
+  if (input.flicks !== undefined) throw new TypeError('flicks is exclusive: cannot combine with other TimeUnits');
+  const {
+    days,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+    microseconds,
+    nanoseconds
+  } = input;
+  const components = {
+    days,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+    microseconds,
+    nanoseconds
+  };
+  const entries = Object.entries(components);
+  if (entries.every(([, v]) => v === undefined)) throw new TypeError('TimeUnits must have at least one defined field');
+  for (const [name, v] of entries) {
+    if (v === undefined) continue;
+    if (!Number.isFinite(v)) throw new RangeError(`${name} must be finite, got ${v}`);
+    if (v === Math.trunc(v) && !Number.isSafeInteger(v)) throw new RangeError(`${name} must be a safe integer when integral, got ${v}`);
+  }
+  const split = n => {
+    const t = Math.trunc(n);
+    return [t, n - t];
+  };
+  const [tDays, fDays] = split(days ?? 0);
+  const [tHours, fHours] = split((hours ?? 0) + fDays * 24);
+  const [tMin, fMin] = split((minutes ?? 0) + fHours * 60);
+  const [tSec, fSec] = split((seconds ?? 0) + fMin * SEC_PER_MIN);
+  const [tMs, fMs] = split((milliseconds ?? 0) + fSec * MS_PER_SEC);
+  const [tUs, fUs] = split((microseconds ?? 0) + fMs * US_PER_MS);
+  const [tNs, fNs] = split((nanoseconds ?? 0) + fUs * NS_PER_US);
+  return {
+    tDays,
+    tHours,
+    tMin,
+    tSec,
+    tMs,
+    tUs,
+    tNs,
+    fNs
+  };
+}
+function wholeSecondsAsBigInt(days, hours, minutes, seconds) {
+  return BigInt(days) * BigInt(SEC_PER_DAY) + BigInt(hours) * BigInt(SEC_PER_HOUR) + BigInt(minutes) * BigInt(SEC_PER_MIN) + BigInt(seconds);
+}
+export function unitsToTicks(input, ticksPerSecond) {
+  const {
+    tDays,
+    tHours,
+    tMin,
+    tSec,
+    tMs,
+    tUs,
+    tNs,
+    fNs
+  } = cascadeUnits(input);
+  const tps = BigInt(ticksPerSecond);
+  const wholeSec = wholeSecondsAsBigInt(tDays, tHours, tMin, tSec);
+  const numerator = wholeSec * tps * BigInt(NS_PER_SEC) + BigInt(tMs) * tps * BigInt(NS_PER_MS) + BigInt(tUs) * tps * BigInt(NS_PER_US) + BigInt(tNs) * tps + BigInt(Math.round(fNs * ticksPerSecond));
+  return divToSafeNumber(numerator, BigInt(NS_PER_SEC));
+}
+export function unitsToBigIntNs(input) {
+  const {
+    tDays,
+    tHours,
+    tMin,
+    tSec,
+    tMs,
+    tUs,
+    tNs,
+    fNs
+  } = cascadeUnits(input);
+  return wholeSecondsAsBigInt(tDays, tHours, tMin, tSec) * BigInt(NS_PER_SEC) + BigInt(tMs) * BigInt(NS_PER_MS) + BigInt(tUs) * BigInt(NS_PER_US) + BigInt(tNs) + BigInt(Math.round(fNs));
+}
+const DURATION_UNITS = [[SEC_PER_DAY * 1000000, 'd'], [SEC_PER_HOUR * 1000000, 'h'], [SEC_PER_MIN * 1000000, 'm'], [1000000, 's'], [US_PER_MS, 'ms'], [1, 'µs']];
+export function formatDurationUs(us) {
+  if (us === 0) return '0s';
+  let remaining = Math.abs(us);
+  const parts = [];
+  for (const [unit, suffix] of DURATION_UNITS) {
+    const n = Math.trunc(remaining / unit);
+    if (n) parts.push(`${n}${suffix}`);
+    remaining -= n * unit;
+  }
+  return (us < 0 ? '-' : '') + parts.join(' ');
+}

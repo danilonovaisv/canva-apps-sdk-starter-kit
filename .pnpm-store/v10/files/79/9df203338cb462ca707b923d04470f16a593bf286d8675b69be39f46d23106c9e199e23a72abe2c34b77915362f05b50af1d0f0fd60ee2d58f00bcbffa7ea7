@@ -1,0 +1,5 @@
+import { exposeTestIds } from '../../test_ids/test_ids';
+export const ButtonTestIds = exposeTestIds ? {
+    base: '1g0j9jr',
+    loadingIconWrapper: '2f3anbi'
+} : {};

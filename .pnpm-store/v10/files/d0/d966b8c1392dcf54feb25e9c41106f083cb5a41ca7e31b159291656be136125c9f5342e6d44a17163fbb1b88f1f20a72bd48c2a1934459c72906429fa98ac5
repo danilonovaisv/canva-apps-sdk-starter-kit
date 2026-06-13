@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { internalItemHeight: "var(--5IuC1Q, calc(var(----lgQg, 0.1rem)*8*5))", internalPadding: "var(--z8oLkw, 8px 16px)", baseUnitInRem: "calc(var(----lgQg, 0.1rem)*8)", menuItemPlaceholder: "vC_rrQ", startIcon: "jNNffA" };
+export default styles;
+export const customProperties = { internalItemHeight: "--5IuC1Q", internalPadding: "--z8oLkw" };
+const dictStyles = { "internalItemHeight": "var(--5IuC1Q, calc(var(----lgQg, 0.1rem)*8*5))", "internalPadding": "var(--z8oLkw, 8px 16px)", "baseUnitInRem": "calc(var(----lgQg, 0.1rem)*8)", "menuItemPlaceholder": "vC_rrQ", "startIcon": "jNNffA" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

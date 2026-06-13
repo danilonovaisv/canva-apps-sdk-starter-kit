@@ -1,0 +1,69 @@
+/**
+ * @public
+ * An error code that identifies why an error was thrown by the app middleware.
+ */
+export type ErrorCode =
+  | "TOKEN_MISSING"
+  | "TOKEN_EXPIRED"
+  | "TOKEN_INVALID"
+  | "APP_ID_MISMATCH";
+/**
+ * @public
+ * Base class for all user authentication errors.
+ * All authentication errors extend this class.
+ */
+export declare class UserAuthError extends Error {
+  /** Machine-readable error code */
+  readonly code: ErrorCode;
+  /** HTTP status code to use when responding to the client */
+  readonly statusCode: number;
+  constructor(message: string, code: ErrorCode, statusCode: number);
+}
+/**
+ * @public
+ * Thrown when the JWT token is missing from the request.
+ * This occurs when the token extractor cannot find a token in the expected location.
+ */
+export declare class TokenMissingError extends UserAuthError {
+  readonly code = "TOKEN_MISSING";
+  readonly statusCode = 401;
+  constructor(message: string);
+}
+/**
+ * @public
+ * Thrown when the JWT token has expired.
+ * The token was valid but is no longer accepted due to expiration.
+ */
+export declare class TokenExpiredError extends UserAuthError {
+  readonly code = "TOKEN_EXPIRED";
+  readonly statusCode = 401;
+  /** When the token expired */
+  readonly expiredAt: Date;
+  constructor(message: string, expiredAt: Date);
+}
+/**
+ * @public
+ * Thrown when the JWT token signature is invalid or token is malformed.
+ * This indicates the token has been tampered with or is not a valid JWT.
+ */
+export declare class TokenInvalidError extends UserAuthError {
+  readonly code = "TOKEN_INVALID";
+  readonly statusCode = 401;
+  /** Reason for the validation failure */
+  readonly reason?: string;
+  constructor(message: string, reason?: string);
+}
+/**
+ * @public
+ * Thrown when the app ID in the token doesn't match the expected app ID.
+ * This prevents tokens issued for one app from being used with another.
+ */
+export declare class AppIdMismatchError extends UserAuthError {
+  readonly code = "APP_ID_MISMATCH";
+  readonly statusCode = 401;
+  /** The expected app ID */
+  readonly expectedAppId: string;
+  /** The app ID found in the token */
+  readonly actualAppId: string;
+  constructor(message: string, expectedAppId: string, actualAppId: string);
+}

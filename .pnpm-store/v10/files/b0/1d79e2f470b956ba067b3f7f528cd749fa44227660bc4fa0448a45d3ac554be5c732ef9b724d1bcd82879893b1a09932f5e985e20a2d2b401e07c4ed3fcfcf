@@ -1,0 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProgressBarMessages = void 0;
+const strings_1 = require('../../i18n/strings');
+exports.ProgressBarMessages = {
+    cancelButtonLabel: () => (0, strings_1.getString)("aGc4mw", "Cancel"),
+    retryButtonLabel: () => (0, strings_1.getString)("xccGqg", "Retry"),
+};

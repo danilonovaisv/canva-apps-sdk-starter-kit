@@ -1,0 +1,20 @@
+import * as React from 'react';
+import { useScrollable } from '../../scroll/scrollable/scrollable';
+export function useSurfaceDividers({ headerDivider, footerDivider }) {
+    const [isScrolled, setIsScrolled] = React.useState(false);
+    const [hasOverflowBelow, setHasOverflowBelow] = React.useState(false);
+    const { ref, onScroll } = useScrollable({
+        onScrollStateChange: (scrollState)=>{
+            if (headerDivider === 'when-scrolled') setIsScrolled(!scrollState.atTop);
+            if (footerDivider === 'has-overflow') setHasOverflowBelow(!scrollState.atBottom && scrollState.scrollableY);
+        }
+    });
+    const showHeaderBorder = headerDivider === 'always' || headerDivider === 'when-scrolled' && isScrolled;
+    const showFooterBorder = footerDivider === 'always' || footerDivider === 'has-overflow' && hasOverflowBelow;
+    return {
+        ref,
+        onScroll,
+        showHeaderBorder,
+        showFooterBorder
+    };
+}

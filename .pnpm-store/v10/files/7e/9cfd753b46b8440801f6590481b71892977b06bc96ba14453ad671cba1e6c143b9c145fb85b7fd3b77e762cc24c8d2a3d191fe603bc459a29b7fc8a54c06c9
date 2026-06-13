@@ -1,0 +1,447 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { Preconditions, UnreachableError } from '../../../../../base/preconditions';
+import { toCallbackRef } from '../../../../../base/react/callback_ref';
+import { composeRefs } from '../../../../../base/react/compose_refs';
+import { useStableFunction } from '../../../../../base/react/stable_function';
+import { useIsomorphicLayoutEffect } from '../../../../../base/react/use_isomorphic_layout_effect';
+import classNames from 'classnames';
+import * as React from 'react';
+import { getNonInteractiveHeight, getVirtualKeyboardOverlayHeight } from '../../../device_capabilities/keyboard';
+import { useViewportHeightVariance } from '../../../device_capabilities/viewport_variance';
+import { useViewportContainerSizeEffect } from '../../../device_capabilities/visual_viewport';
+import { Layer } from '../../../layer/layer';
+import { Spacer } from '../../../layout/layout';
+import { baseUnit } from '../../../metrics/metrics';
+import { MobileEventHandler } from '../../../mobile_event_handler/mobile_event_handler';
+import { getSafeAreaInsets } from '../../../platform_quirks/get_safe_area_insets';
+import { getScrollState } from '../../../scroll/scroll';
+import backgroundStyles from '../../background/background.css';
+import { SurfaceHeaderCloseButton, SurfaceHeaderContextProvider } from '../../header/header';
+import { ContentContainer } from '../../internal/content_container';
+import { DismissArea } from '../../internal/dismiss_area/dismiss_area';
+import { ReferenceWrapper } from '../../internal/reference_wrapper';
+import { useScrollPaddingRefs } from '../../internal/scroll_padding';
+import { useSurfaceDividers } from '../../internal/surface_dividers';
+import { resolveTrigger } from '../../internal/trigger';
+import { useSheetControls, useSheetDrag, useSheetPositioner, useSheetScroll } from '../behavior/behavior';
+import { useSurfaceTransition } from '../../transition/transition';
+import { useContentScrollable } from './content_scrollable';
+import styles, { customProperties } from './sheet.css';
+const transitionDurationMs = parseInt(styles.transitionTime, 10);
+export function Sheet(
+    { open, id: idProp, onOpenComplete, onCloseComplete, onBackButton, backdropVisible = true, markOutsideInert = backdropVisible, trigger, ref, ...inner }
+) {
+    const defaultId = React.useId();
+    const id = idProp || defaultId;
+    const handleBackButton = React.useCallback((event)=>{
+        if (!open || onBackButton == null && inner.onRequestClose == null) return;
+        event.stopPropagation();
+        if (onBackButton) {
+            onBackButton(event);
+            return;
+        }
+        inner.onRequestClose?.({
+            action: 'backButton'
+        });
+    }, [
+        open,
+        onBackButton,
+        inner
+    ]);
+    const resolvedTrigger = resolveTrigger({
+        open,
+        id,
+        role: inner.role,
+        trigger
+    });
+    const transition = useSurfaceTransition({
+        open,
+        transitionDurationMs,
+        onOpenComplete,
+        onCloseComplete
+    });
+    return _jsxs(_Fragment, {
+        children: [
+            _jsx(ReferenceWrapper, {
+                content: resolvedTrigger
+            }),
+            _jsx(Layer, {
+                open: transition.rendering,
+                markOutsideInert: markOutsideInert,
+                children: _jsx("div", {
+                    className: classNames({
+                        [styles.transitioning]: transition.animated && !transition.open,
+                        [styles.visible]: transition.opening || transition.open
+                    }),
+                    children: _jsx(MobileEventHandler, {
+                        onBackButton: handleBackButton,
+                        children: _jsx(SheetInner, {
+                            ...inner,
+                            id: id,
+                            backdropVisible: backdropVisible,
+                            handleRef: ref
+                        })
+                    })
+                })
+            })
+        ]
+    });
+}
+const heightMap = {
+    ['half']: 50,
+    ['full']: 100
+};
+const dismissPoint = {
+    type: 'fixed',
+    height: 0
+};
+function resolveHeight(height) {
+    if (height === 'auto') height = {
+        autoUpTo: 'full'
+    };
+    return typeof height === 'string' ? {
+        type: 'fixed',
+        height: heightMap[height]
+    } : {
+        type: 'auto',
+        height: heightMap[height.autoUpTo]
+    };
+}
+const VIEWPORT_DEBOUNCE_DURATION = 600;
+function SheetInner({ handleRef, height = 'auto', scrollToResizeBelow, onHeightChange, onRequestClose, onScroll, backdropVisible, handleSafeAreaInsetBottom = true, animateResize, id, children, header, headerDivider = 'always', footer, footerDivider = 'never', handleVisible = 'auto', _tempVideoOnlyIgnoreVirtualKeyboardOffset = false, ...contentContainerProps }) {
+    const heights = React.useMemo(()=>ensureArray(height), [
+        height
+    ]);
+    Preconditions.checkArgument(heights.length > 0, 'Sheets require at least one height value');
+    const isDismissible = onRequestClose != null;
+    const snapPoints = React.useMemo(()=>[
+            ...heights.map(resolveHeight),
+            ...(isDismissible ? [
+                dismissPoint
+            ] : [])
+        ], [
+        heights,
+        isDismissible
+    ]);
+    const [snapPointIndex, setSnapPointIndex] = useStabilizedSnapPoint({
+        snapPoints,
+        onSnapPointChange: (index)=>onHeightChange?.(heights[index])
+    });
+    const containerRef = React.useRef(null);
+    const footerRef = React.useRef(null);
+    const contentRef = React.useRef(null);
+    const endMarkerRef = React.useRef(null);
+    React.useImperativeHandle(handleRef, ()=>createSheetImperativeHandle(contentRef, snapPoints, setSnapPointIndex), [
+        setSnapPointIndex,
+        snapPoints
+    ]);
+    const { handleSnap, cancelSnap, scheduleUpdate, setDragOffset, ref: snapAnimationRef } = useSheetPositioner(animateResize);
+    const { resizing, controls } = useSheetControls({
+        snapPoints,
+        snapPointIndex,
+        setSnapPointIndex: (index)=>{
+            footerRef.current?.style.setProperty('transform', '');
+            if (onRequestClose != null && snapPoints[index] === dismissPoint) {
+                cancelSnap();
+                onRequestClose({
+                    action: 'resize'
+                });
+                return;
+            }
+            handleSnap();
+            setSnapPointIndex(index);
+        },
+        getScrollHeight: ()=>{
+            const endMarkerTop = endMarkerRef.current?.offsetTop ?? 0;
+            const footerHeight = footerRef.current?.clientHeight ?? 0;
+            const dragHandleContainerHeight = baseUnit;
+            return dragHandleContainerHeight + endMarkerTop + footerHeight + getSafeAreaInsets().bottom;
+        },
+        setOffset: (offset, snapPointHeight)=>scheduleUpdate(()=>{
+                const el = containerRef.current;
+                if (el == null) return;
+                let finalOffset = offset;
+                if (offset != null && offset > 0) {
+                    if (el.clientHeight === snapPointHeight) finalOffset = undefined;
+                }
+                if (finalOffset != null) setDragOffset(finalOffset);
+                const footerEl = footerRef.current;
+                if (footerEl == null) return;
+                const footerDisplacementY = el.clientHeight - (snapPointHeight ?? 0);
+                footerEl.style.transform = finalOffset != null ? `translateY(${finalOffset - footerDisplacementY}px)` : '';
+            })
+    });
+    const viewportDifferenceHeight = useViewportHeightVariance();
+    const customPropertyRef = React.useRef(null);
+    const previousContainer = React.useRef(undefined);
+    useViewportContainerSizeEffect((maybeViewportContainer)=>{
+        if (maybeViewportContainer == null || customPropertyRef.current == null) return;
+        const viewportContainer = maybeViewportContainer;
+        const customPropertyEl = customPropertyRef.current;
+        const virtualKeyboardHeight = _tempVideoOnlyIgnoreVirtualKeyboardOffset ? 0 : getVirtualKeyboardOverlayHeight();
+        const visualViewportHeight = viewportContainer.height - (virtualKeyboardHeight > 0 ? getNonInteractiveHeight() : 0);
+        const { scrollHeight = 0, clientHeight = 0, scrollTop = 0 } = contentRef.current || {};
+        function updateCustomProperties(viewportIsExpanding) {
+            const virtualKeyboardHeight = getVirtualKeyboardOverlayHeight();
+            const style = customPropertyEl.style;
+            style.setProperty(customProperties.visualViewportOffsetTop, `${viewportContainer.offsetTop}px`);
+            style.setProperty(customProperties.visualViewportHeight, `${visualViewportHeight}px`);
+            style.setProperty(customProperties.virtualKeyboardHeight, `${virtualKeyboardHeight}px`);
+            const needScrollPositionAdjustment = !viewportIsExpanding && viewportContainer.offsetTop !== 0;
+            const contentScrollBottom = scrollHeight - clientHeight - scrollTop;
+            if (needScrollPositionAdjustment) {
+                const { scrollHeight: newScrollHeight = 0, clientHeight: newClientHeight = 0 } = contentRef.current || {};
+                const viewportTopDisplacement = viewportContainer.offsetTop - virtualKeyboardHeight;
+                contentRef.current?.scrollTo({
+                    top: viewportTopDisplacement + newScrollHeight - newClientHeight - contentScrollBottom
+                });
+            }
+        }
+        const previousHeight = previousContainer.current?.height ?? 0;
+        previousContainer.current = viewportContainer;
+        if (viewportContainer.height > previousHeight) {
+            updateCustomProperties(true);
+            return;
+        }
+        const id = setTimeout(updateCustomProperties, VIEWPORT_DEBOUNCE_DURATION);
+        return ()=>clearTimeout(id);
+    });
+    const hasHandle = handleVisible === 'auto' && snapPoints.length > 1;
+    const snapPoint = snapPoints[snapPointIndex];
+    const snapHeight = calculateSnapHeight(snapPoint, resizing, containerRef);
+    const onRequestCloseByBackdrop = React.useCallback(()=>{
+        onRequestClose?.({
+            action: 'backdrop'
+        });
+    }, [
+        onRequestClose
+    ]);
+    const { ref: scrollableRef, onScroll: onScrollableScroll, showHeaderBorder: showHeaderDivider, showFooterBorder: showFooterDivider } = useSurfaceDividers({
+        headerDivider,
+        footerDivider
+    });
+    const handleScroll = React.useCallback(({ scrollTop })=>{
+        onScroll?.({
+            scrollTop
+        });
+        onScrollableScroll?.();
+    }, [
+        onScroll,
+        onScrollableScroll
+    ]);
+    const { containerRef: scrollPaddingContainerRef, headerRef: scrollPaddingHeaderRef, footerRef: scrollPaddingFooterRef } = useScrollPaddingRefs();
+    let content = _jsxs(_Fragment, {
+        children: [
+            children,
+            _jsx("div", {
+                ref: endMarkerRef
+            })
+        ]
+    });
+    const hasDecorations = header != null || footer != null;
+    if (hasDecorations) content = _jsxs(_Fragment, {
+        children: [
+            header != null && _jsx(SurfaceHeaderContextProvider, {
+                alignText: "center",
+                end: onRequestClose ? _jsx(SurfaceHeaderCloseButton, {
+                    onClick: ()=>onRequestClose()
+                }) : undefined,
+                children: _jsx("div", {
+                    ref: scrollPaddingHeaderRef,
+                    className: classNames(styles.header, {
+                        [styles.headerBorder]: showHeaderDivider
+                    }),
+                    children: header
+                })
+            }),
+            _jsx("div", {
+                className: styles.content,
+                children: content
+            }),
+            footer != null && _jsx("div", {
+                className: classNames(styles.footer, {
+                    [styles.footerBorder]: showFooterDivider
+                }),
+                ref: composeRefs(footerRef, scrollPaddingFooterRef),
+                children: footer
+            })
+        ]
+    });
+    const isIos26OrAbove = getIsIos26OrAbove();
+    const isFullHeight = snapPoint.height === heightMap['full'];
+    return _jsxs("div", {
+        ref: customPropertyRef,
+        className: classNames(styles.sheetContainer, backdropVisible && styles.backdrop, hasDecorations && styles.hasDecorations, !isFullHeight && styles.sheetContainerTransition),
+        style: {
+            [customProperties.viewportDifferenceHeight]: viewportDifferenceHeight,
+            [customProperties.snapHeight]: snapHeight
+        },
+        children: [
+            _jsx("div", {
+                className: styles.safeAreaHandler,
+                children: _jsxs("div", {
+                    className: classNames(styles.sheet, snapPoint.type === 'auto' && styles.auto, resizing && styles.resizing),
+                    ref: composeRefs(containerRef, snapAnimationRef),
+                    children: [
+                        backdropVisible && onRequestClose != null && _jsx(DismissArea, {
+                            className: styles.dismissArea,
+                            onClick: onRequestCloseByBackdrop
+                        }),
+                        hasHandle ? _jsx(SheetDragHandle, {
+                            controls: controls
+                        }) : _jsx(Spacer, {
+                            size: "1u"
+                        }),
+                        _jsx(SheetContent, {
+                            ref: contentRef,
+                            scrollPaddingRef: scrollPaddingContainerRef,
+                            scrollableRef: scrollableRef,
+                            scrollToResizeBelow: scrollToResizeBelow && resolveHeight(scrollToResizeBelow),
+                            controls: controls,
+                            handleSafeAreaInsetBottom: handleSafeAreaInsetBottom,
+                            id: id,
+                            onScroll: handleScroll,
+                            ...contentContainerProps,
+                            children: content
+                        })
+                    ]
+                })
+            }),
+            isIos26OrAbove && _jsx("div", {
+                className: styles.safari26ControlsBackground
+            }),
+            isIos26OrAbove && _jsx("div", {
+                className: styles.safari26KeyboardBackground
+            })
+        ]
+    });
+}
+function ensureArray(argument) {
+    if (Array.isArray(argument)) return argument;
+    return [
+        argument
+    ];
+}
+function useStabilizedSnapPoint({ snapPoints, onSnapPointChange }) {
+    const [index, setRawIndex] = React.useState(0);
+    const previousSnapPoints = React.useRef(snapPoints);
+    const setIndex = useStableFunction((newIndex)=>{
+        setRawIndex(newIndex);
+        if (!pointsEqual(snapPoints[newIndex], previousSnapPoints.current[index]))
+            onSnapPointChange(newIndex);
+    });
+    useIsomorphicLayoutEffect(()=>{
+        const previousPoint = previousSnapPoints.current[index];
+        if (!pointsEqual(snapPoints[index], previousPoint)) {
+            let newIndex = snapPoints.findIndex((point)=>pointsEqual(point, previousPoint));
+            if (newIndex === -1) newIndex = 0;
+            setIndex(newIndex);
+        }
+        previousSnapPoints.current = snapPoints;
+    }, [
+        snapPoints,
+        index,
+        setIndex
+    ]);
+    return [
+        Math.min(index, snapPoints.length - 1),
+        setIndex
+    ];
+}
+const pointsEqual = (a, b)=>a != null && b != null && a.type === b.type && a.height === b.height;
+function calculateSnapHeight(snapPoint, resizing, containerRef) {
+    switch(snapPoint.type){
+        case 'fixed':
+            return snapPoint.height + '%';
+        case 'auto':
+            if (!resizing)
+                return snapPoint.height + '%';
+            return (containerRef.current?.clientHeight ?? 0) - getSafeAreaInsets().bottom + 'px';
+        default:
+            throw new UnreachableError(snapPoint);
+    }
+}
+function SheetDragHandle({ controls }) {
+    const { dragRef } = useSheetDrag({
+        controls
+    });
+    return _jsx("div", {
+        className: styles.dragHandleContainer,
+        ref: dragRef,
+        children: _jsx("div", {
+            className: styles.dragHandle
+        })
+    });
+}
+function SheetContent(
+    { controls, scrollToResizeBelow, handleSafeAreaInsetBottom, onScroll, id, children, scrollPaddingRef, scrollableRef, ref: imperativeScrollRef, ...contentContainerProps }
+) {
+    const { contentRef } = useSheetScroll({
+        controls,
+        scrollToResizeBelow
+    });
+    const { hasScroll, contentScrollRef } = useContentScrollable();
+    const handleScroll = React.useCallback((e)=>{
+        const scrollTop = e.target?.scrollTop ?? 0;
+        onScroll?.({
+            scrollTop
+        });
+    }, [
+        onScroll
+    ]);
+    return _jsx(ContentContainer, {
+        ref: toCallbackRef(composeRefs(contentRef, contentScrollRef, imperativeScrollRef, scrollPaddingRef, scrollableRef)),
+        id: id,
+        className: classNames(styles.contentContainer, backgroundStyles.elevationSurfaceRaisedBackground, {
+            [styles.handleSafeAreaInsetBottom]: handleSafeAreaInsetBottom,
+            [styles.noTouchAction]: !hasScroll
+        }),
+        onScroll: handleScroll,
+        ...contentContainerProps,
+        children: children
+    });
+}
+const createSheetImperativeHandle = (innerRef, snapPoints, setSnapPointIndex)=>({
+        setHeight: (height)=>{
+            const newPoint = resolveHeight(height);
+            const newIndex = snapPoints.findIndex((point)=>pointsEqual(point, newPoint));
+            Preconditions.checkArgument(newIndex !== -1);
+            setSnapPointIndex(newIndex);
+        },
+        getScrollState: ()=>innerRef.current ? getScrollState(innerRef.current) : undefined,
+        scrollTo: (options)=>{
+            const el = innerRef?.current;
+            if (el == null) return;
+            if (typeof options === 'number') el.scrollTo(0, options);
+            else el.scrollTo(options);
+        },
+        getBoundingClientRect: ()=>innerRef.current?.getBoundingClientRect(),
+        get scrollTop () {
+            return innerRef.current?.scrollTop;
+        },
+        get scrollLeft () {
+            return innerRef.current?.scrollLeft;
+        },
+        get scrollHeight () {
+            return innerRef.current?.scrollHeight;
+        },
+        get scrollWidth () {
+            return innerRef.current?.scrollWidth;
+        },
+        get clientHeight () {
+            return innerRef.current?.clientHeight;
+        },
+        get clientWidth () {
+            return innerRef.current?.clientWidth;
+        },
+        get offsetHeight () {
+            return innerRef.current?.offsetHeight;
+        },
+        get offsetWidth () {
+            return innerRef.current?.offsetWidth;
+        }
+    });
+const globalNavigator = typeof navigator !== 'undefined' ? navigator : undefined;
+const getIsIos26OrAbove = ()=>{
+    return globalNavigator != null && !!globalNavigator.userAgent.match(/iPhone OS 18_/gi) && !globalNavigator.userAgent.match(/Version\/18/gi);
+};

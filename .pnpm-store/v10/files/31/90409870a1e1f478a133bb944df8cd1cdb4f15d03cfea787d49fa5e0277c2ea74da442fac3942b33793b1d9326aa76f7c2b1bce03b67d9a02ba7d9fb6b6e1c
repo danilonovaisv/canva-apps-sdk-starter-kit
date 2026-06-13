@@ -1,0 +1,25 @@
+import * as React from 'react';
+export type InputWrapperProps = {
+    children: React.ReactNode
+    blurOnEnterKeyDown?: boolean
+    disabled?: boolean
+    error?: boolean
+    className?: string
+    activeClassName?: string
+    hoveredClassName?: string
+    errorClassName?: string
+    disabledClassName?: string
+    ref?: React.RefObject<HTMLDivElement | null>
+    testId?: string
+};
+export declare const InputWrapper: React.ComponentType<InputWrapperProps>;
+type InputWrapperContextValue = {
+    setFocused: (value: boolean) => void;
+    inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+    focusWrapper: () => void;
+    blurOnEnterKeyDown?: boolean;
+    error?: boolean;
+    disabled?: boolean;
+};
+export declare function useInputWrapperContext(): InputWrapperContextValue;
+export {};

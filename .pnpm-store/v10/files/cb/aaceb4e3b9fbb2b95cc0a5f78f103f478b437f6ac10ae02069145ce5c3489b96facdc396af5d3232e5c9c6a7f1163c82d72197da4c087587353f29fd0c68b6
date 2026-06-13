@@ -1,0 +1,21 @@
+import * as React from 'react';
+import type { ButtonProps } from '../../button/button';
+import type { ReferenceObject, Width } from '../../surface/popover/popover';
+import type { ColorPickerChangeSource, ColorPickerProps } from './color_picker';
+export type StatelessColorPickerPopoverProps<TSource extends ColorPickerChangeSource = ColorPickerChangeSource> = {
+    trigger?: ((props: ColorPickerTriggerProps) => React.ReactNode) | ReferenceObject
+    open: boolean
+    id: string
+    ariaLabel?: string
+    ariaLabelledBy?: string
+    onClick?: () => void
+    onRequestClose?: () => void
+    width?: Width
+} & ColorPickerProps<TSource>;
+export type ColorPickerPopoverProps<TSource extends ColorPickerChangeSource = ColorPickerChangeSource> = Omit<StatelessColorPickerPopoverProps<TSource>, 'id' | 'open'> & {
+    onOpen?: () => void
+    onClose?: () => void
+};
+export type ColorPickerTriggerProps = Pick<ButtonProps, 'ariaLabel' | 'ariaLabelledBy' | 'id' | 'children' | 'active' | 'pressed' | 'disclosure' | 'ariaControls' | 'ariaHasPopup' | 'onClick'>;
+export declare const ColorPickerPopover: <TSource extends ColorPickerChangeSource = ColorPickerChangeSource>({ trigger, color, alpha, ariaLabel, ariaLabelledBy, onChange, onChangeStart, onChangeComplete, onStartEyedropper, onOpen, onClose, onDeleteColor, header, body, footer, width, }: ColorPickerPopoverProps<TSource>) => React.JSX.Element;
+export declare function StatelessColorPickerPopover<TSource extends ColorPickerChangeSource = ColorPickerChangeSource>(props: StatelessColorPickerPopoverProps<TSource>): React.JSX.Element;

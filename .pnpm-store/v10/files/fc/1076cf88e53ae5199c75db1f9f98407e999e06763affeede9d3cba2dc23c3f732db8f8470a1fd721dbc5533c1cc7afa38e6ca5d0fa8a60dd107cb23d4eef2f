@@ -1,0 +1,3 @@
+export function composeHandles(...handles) {
+    return Object.defineProperties({}, Object.assign({}, ...handles.map((h)=>Object.getOwnPropertyDescriptors(h))));
+}

@@ -1,0 +1,99 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { toCallbackRef } from '../../../../../base/react/callback_ref';
+import { composeRefs } from '../../../../../base/react/compose_refs';
+import classNames from 'classnames';
+import * as React from 'react';
+import { isVirtualKeyboard } from '../../../device_capabilities/device_capabilities';
+import styles from './base_input.css';
+import { useInputWrapperContext } from './input_wrapper';
+export const InputField = ({ ref, ...props })=>{
+    const { onFocus: onFocusProp, onBlur: onBlurProp, onKeyDown: onKeyDownProp, onChangeComplete: onChangeCompleteProp } = props;
+    const { inputRef, setFocused, focusWrapper, blurOnEnterKeyDown, error, disabled } = useInputWrapperContext();
+    const onFocus = React.useCallback((e)=>{
+        onFocusProp?.(e);
+        setFocused(true);
+    }, [
+        onFocusProp,
+        setFocused
+    ]);
+    const onBlur = React.useCallback((e)=>{
+        onBlurProp?.(e);
+        onChangeCompleteProp?.(e.target.value);
+        setFocused(false);
+    }, [
+        onBlurProp,
+        onChangeCompleteProp,
+        setFocused
+    ]);
+    const onKeyDown = React.useCallback((e)=>{
+        if (e.keyCode === 229) {
+            e.stopPropagation();
+            return;
+        }
+        if (e.key === 'Enter' && blurOnEnterKeyDown)
+        focusWrapper();
+        onKeyDownProp?.(e);
+        if (!blurOnEnterKeyDown && e.key === 'Enter')
+            onChangeCompleteProp?.(e.currentTarget.value);
+    }, [
+        onKeyDownProp,
+        onChangeCompleteProp,
+        blurOnEnterKeyDown,
+        focusWrapper
+    ]);
+    const inputClassName = classNames(styles.textField, styles.singleLineTextField, {
+        [styles.textAlignCenter]: props.textAlignCenter,
+        [styles.noAutocomplete]: props.autoComplete === 'off'
+    }, props.className);
+    return _jsx("input", {
+        id: props.id,
+        className: inputClassName,
+        value: props.value,
+        onChange: props.onChange,
+        onFocus: onFocus,
+        onBlur: onBlur,
+        onKeyDown: onKeyDown,
+        onClick: props.onClick,
+        onMouseDown: props.onMouseDown,
+        onMouseUp: props.onMouseUp,
+        onContextMenu: props.onContextMenu,
+        onPaste: props.onPaste,
+        onKeyUp: props.onKeyUp,
+        ref: toCallbackRef(composeRefs(inputRef, ref)),
+        dir: "auto",
+        spellCheck: props.disableSpellcheck ? false : undefined,
+        type: props.type,
+        inputMode: props.inputMode,
+        autoCapitalize: props.autoCapitalize,
+        autoCorrect: props.autoCorrect,
+        pattern: props.pattern,
+        autoFocus: props.autoFocus === 'always' || props.autoFocus === 'on-desktop' && !isVirtualKeyboard(),
+        autoComplete: props.autoComplete,
+        disabled: disabled,
+        readOnly: props.readOnly,
+        maxLength: props.maxLength,
+        max: props.max,
+        min: props.min,
+        placeholder: props.placeholder,
+        step: props.step,
+        name: props.name,
+        role: props.role,
+        "data-testid": props.testId,
+        enterKeyHint: props.enterKeyHint,
+        "aria-roledescription": props.ariaRoleDescription,
+        "aria-required": props.required || undefined,
+        "aria-invalid": error || undefined,
+        "aria-label": props.ariaLabel,
+        "aria-labelledby": props.ariaLabelledBy,
+        "aria-describedby": props.ariaDescribedBy,
+        "aria-autocomplete": props.ariaAutoComplete,
+        "aria-activedescendant": props.ariaActiveDescendant,
+        "aria-controls": props.ariaControls,
+        "aria-expanded": props.ariaExpanded,
+        "aria-haspopup": props.ariaHasPopup,
+        "aria-valuenow": props.ariaValueNow,
+        "aria-valuetext": props.ariaValueText,
+        "aria-valuemin": props.ariaValueMin,
+        "aria-valuemax": props.ariaValueMax
+    });
+};

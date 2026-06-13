@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "BaseSelectTestIds", {
+    enumerable: true,
+    get: function() {
+        return BaseSelectTestIds;
+    }
+});
+const _test_ids = require('../../../test_ids/test_ids');
+const BaseSelectTestIds = _test_ids.exposeTestIds ? {
+    triggerContainer: 'ek6ugf',
+    menuContainer: '2hmvcmn'
+} : {};

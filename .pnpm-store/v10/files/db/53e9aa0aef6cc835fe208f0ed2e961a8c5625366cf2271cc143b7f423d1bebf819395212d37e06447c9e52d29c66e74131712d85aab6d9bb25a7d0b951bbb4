@@ -1,0 +1,62 @@
+import * as React from 'react';
+import styles from './progress_bar_indicator.css';
+const BUBBLE_STYLES = [
+    styles.bubble0,
+    styles.bubble1,
+    styles.bubble2,
+    styles.bubble3
+];
+const BUBBLE_TTLS = [
+    2000,
+    3000,
+    4000,
+    2000
+];
+const BUBBLE_UPDATE_INTERVAL_MS = 1000;
+const BUBBLE_PER_PIXEL_RATIO = 0.13;
+export { BUBBLE_STYLES };
+export function useBubbles({ value, trackWidth, enabled }) {
+    const [bubbles, setBubbles] = React.useState([]);
+    const timerRef = React.useRef(0);
+    const updateBubbles = React.useCallback(()=>{
+        const now = Date.now();
+        const fillWidth = trackWidth / 100 * value;
+        const requiredBubblesAmount = Math.ceil(fillWidth * BUBBLE_PER_PIXEL_RATIO);
+        setBubbles((prev)=>{
+            const requiredBubblesAmountDelta = requiredBubblesAmount - prev.length;
+            const newBubblesAmount = requiredBubblesAmountDelta < 0 ? requiredBubblesAmount : Math.ceil(prev.length + requiredBubblesAmountDelta / 2);
+            let changed = false;
+            const next = Array.from({
+                length: newBubblesAmount
+            }, (_, i)=>{
+                const bubble = prev[i];
+                if (bubble === undefined || now > BUBBLE_TTLS[bubble.type] + bubble.start) {
+                    changed = true;
+                    return {
+                        swap: bubble ? !bubble.swap : false,
+                        type: Math.floor(Math.random() * BUBBLE_STYLES.length),
+                        position: Math.floor(Math.random() * fillWidth),
+                        start: now
+                    };
+                }
+                return bubble;
+            });
+            return changed ? next : prev;
+        });
+        window.clearTimeout(timerRef.current);
+        timerRef.current = window.setTimeout(updateBubbles, BUBBLE_UPDATE_INTERVAL_MS);
+    }, [
+        value,
+        trackWidth
+    ]);
+    React.useEffect(()=>{
+        if (enabled) updateBubbles();
+        return ()=>{
+            window.clearTimeout(timerRef.current);
+        };
+    }, [
+        enabled,
+        updateBubbles
+    ]);
+    return enabled ? bubbles : [];
+}

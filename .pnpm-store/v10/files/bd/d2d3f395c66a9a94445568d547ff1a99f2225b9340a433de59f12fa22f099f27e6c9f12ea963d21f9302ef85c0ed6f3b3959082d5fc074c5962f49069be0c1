@@ -1,0 +1,156 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { composeRefs } from '../../../../../base/react/compose_refs';
+import classNames from 'classnames';
+import * as React from 'react';
+import Measure from 'react-measure';
+import { baseUnit } from '../../../metrics/metrics';
+import backgroundStyles from '../../background/background.css';
+import { ContentContainer } from '../../internal/content_container';
+import { useSurfaceDividers } from '../../internal/surface_dividers';
+import { resolveTrigger } from '../../internal/trigger';
+import { Pin } from '../../pin/pin';
+import { useSurfaceTransition } from '../../transition/transition';
+import { Arrow } from './arrow';
+import styles, { customProperties } from './popover.css';
+const WIDTH_CSS_VALUES = {
+    ['16u']: styles.width16U,
+    ['32u']: styles.width32U,
+    ['40u']: styles.width40U,
+    ['45u']: styles.width45U,
+    ['52u']: styles.width52U,
+    ['trigger']: styles.widthPresetTrigger,
+    ['auto']: undefined
+};
+export function Popover(
+    { id: idProp, open, onRequestClose, onCloseComplete, onScroll, blockOutsidePointerEvents = false, trigger, placement = 'auto', enableFlip, enableShift, width = 'auto', minWidth = 'auto', maxWidth = 'auto', offset = '1u', arrow = false, borderRadius = 'container', children, header, headerDivider = 'always', footer, footerDivider = 'never', ...contentContainerProps }
+) {
+    const defaultId = React.useId();
+    const id = idProp || defaultId;
+    const contentContainerRef = React.useRef(null);
+    const contentContainerClassName = classNames(styles.contentContainer, borderRadius === 'container' && styles.withBorderRadius, backgroundStyles.elevationSurfaceFloatingBackground);
+    const contentContainerStyle = {
+        [customProperties.desiredWidth]: WIDTH_CSS_VALUES[width],
+        [customProperties.desiredMaxWidth]: WIDTH_CSS_VALUES[maxWidth],
+        [customProperties.desiredMinWidth]: WIDTH_CSS_VALUES[minWidth]
+    };
+    const onCalculateLayout = React.useCallback((data)=>{
+        const element = contentContainerRef.current;
+        if (element == null) return;
+        element.style.setProperty(customProperties.triggerWidth, `${Math.floor(data.reference.width)}px`);
+        element.style.setProperty(customProperties.availableWidth, `${data.available.width}px`);
+        element.style.setProperty(customProperties.availableHeight, `${data.available.height}px`);
+    }, []);
+    const pinRef = React.useRef(null);
+    const contentHeightRef = React.useRef(0);
+    const updatePinPosition = React.useCallback(()=>{
+        pinRef.current?.update();
+    }, []);
+    const onResize = React.useCallback((contentRect)=>{
+        const contentHeight = contentRect.client?.height ?? 0;
+        if (contentHeightRef.current !== contentHeight) {
+            contentHeightRef.current = contentHeight;
+            updatePinPosition();
+        }
+    }, [
+        updatePinPosition
+    ]);
+    const { ref: scrollableRef, onScroll: onDividerScroll, showHeaderBorder: showHeaderDivider, showFooterBorder: showFooterDivider } = useSurfaceDividers({
+        headerDivider,
+        footerDivider
+    });
+    const handleScroll = React.useCallback((e)=>{
+        const target = e.target;
+        const scrollTop = target?.scrollTop ?? 0;
+        onScroll?.({
+            scrollTop
+        });
+        onDividerScroll?.();
+    }, [
+        onScroll,
+        onDividerScroll
+    ]);
+    const onOutsidePointerDown = React.useCallback(({ target })=>{
+        if (onRequestClose && target !== 'reference')
+        onRequestClose();
+    }, [
+        onRequestClose
+    ]);
+    const resolvedTrigger = resolveTrigger({
+        trigger,
+        open,
+        id,
+        role: contentContainerProps.role
+    });
+    const transition = useSurfaceTransition({
+        open,
+        transitionDurationMs,
+        onCloseComplete
+    });
+    return _jsx(Pin, {
+        ref: pinRef,
+        placement: placement,
+        enableFlip: enableFlip,
+        enableShift: enableShift,
+        offset: resolveOffset(offset),
+        open: transition.rendering,
+        onOutsidePointerDown: onOutsidePointerDown,
+        blockOutsidePointerEvents: blockOutsidePointerEvents,
+        onCalculateLayout: onCalculateLayout,
+        reference: resolvedTrigger,
+        children: ({ setArrow })=>_jsx(Measure, {
+                onResize: onResize,
+                client: true,
+                children: ({ measureRef })=>_jsx("div", {
+                        className: transition.opening || transition.open ? styles.visible : undefined,
+                        children: _jsxs("div", {
+                            className: styles.contentWrapper,
+                            children: [
+                                _jsxs(ContentContainer, {
+                                    ref: composeRefs(contentContainerRef, measureRef, scrollableRef),
+                                    className: contentContainerClassName,
+                                    style: contentContainerStyle,
+                                    id: id,
+                                    onRequestEscape: onRequestClose,
+                                    onScroll: handleScroll,
+                                    ...contentContainerProps,
+                                    children: [
+                                        header != null && _jsx("div", {
+                                            className: classNames(styles.header, {
+                                                [styles.headerBorder]: showHeaderDivider
+                                            }),
+                                            children: header
+                                        }),
+                                        _jsx("div", {
+                                            className: styles.content,
+                                            children: children
+                                        }),
+                                        footer != null && _jsx("div", {
+                                            className: classNames(styles.footer, {
+                                                [styles.footerBorder]: showFooterDivider
+                                            }),
+                                            children: footer
+                                        })
+                                    ]
+                                }),
+                                _jsx("div", {
+                                    className: classNames(styles.shadowMask, borderRadius === 'container' && styles.withBorderRadius)
+                                }),
+                                arrow && _jsx(Arrow, {
+                                    ref: setArrow,
+                                    placement: placement
+                                })
+                            ]
+                        })
+                    })
+            })
+    });
+}
+const transitionDurationMs = parseInt(styles.transitionTime, 10);
+function resolveOffset(offset) {
+    if (typeof offset === 'object') return offset;
+    return {
+        main: offset === '0' ? 0 : parseUnitMultiplier(offset),
+        cross: 0
+    };
+}
+const parseUnitMultiplier = (value)=>parseFloat(value.slice(0, -1)) * baseUnit;

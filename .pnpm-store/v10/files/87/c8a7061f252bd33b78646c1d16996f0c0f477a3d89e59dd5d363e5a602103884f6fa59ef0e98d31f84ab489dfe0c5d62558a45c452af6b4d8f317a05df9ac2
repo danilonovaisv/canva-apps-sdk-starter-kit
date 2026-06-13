@@ -1,0 +1,210 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "Popover", {
+    enumerable: true,
+    get: function() {
+        return Popover;
+    }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _compose_refs = require('../../../../../base/react/compose_refs');
+const _classnames = _interop_require_default(require("classnames"));
+const _react = _interop_require_wildcard(require("react"));
+const _reactmeasure = _interop_require_default(require("react-measure"));
+const _metrics = require('../../../metrics/metrics');
+const _backgroundcss = _interop_require_default(require('../../background/background.css'));
+const _content_container = require('../../internal/content_container');
+const _surface_dividers = require('../../internal/surface_dividers');
+const _trigger = require('../../internal/trigger');
+const _pin = require('../../pin/pin');
+const _transition = require('../../transition/transition');
+const _arrow = require("./arrow");
+const _popovercss = _interop_require_wildcard(require("./popover.css"));
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
+function _getRequireWildcardCache(nodeInterop) {
+    if (typeof WeakMap !== "function") return null;
+    var cacheBabelInterop = new WeakMap();
+    var cacheNodeInterop = new WeakMap();
+    return (_getRequireWildcardCache = function(nodeInterop) {
+        return nodeInterop ? cacheNodeInterop : cacheBabelInterop;
+    })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+    if (!nodeInterop && obj && obj.__esModule) {
+        return obj;
+    }
+    if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+        return {
+            default: obj
+        };
+    }
+    var cache = _getRequireWildcardCache(nodeInterop);
+    if (cache && cache.has(obj)) {
+        return cache.get(obj);
+    }
+    var newObj = {
+        __proto__: null
+    };
+    var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+    for(var key in obj){
+        if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) {
+            var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+            if (desc && (desc.get || desc.set)) {
+                Object.defineProperty(newObj, key, desc);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+    }
+    newObj.default = obj;
+    if (cache) {
+        cache.set(obj, newObj);
+    }
+    return newObj;
+}
+const WIDTH_CSS_VALUES = {
+    ['16u']: _popovercss.default.width16U,
+    ['32u']: _popovercss.default.width32U,
+    ['40u']: _popovercss.default.width40U,
+    ['45u']: _popovercss.default.width45U,
+    ['52u']: _popovercss.default.width52U,
+    ['trigger']: _popovercss.default.widthPresetTrigger,
+    ['auto']: undefined
+};
+function Popover({ id: idProp, open, onRequestClose, onCloseComplete, onScroll, blockOutsidePointerEvents = false, trigger, placement = 'auto', enableFlip, enableShift, width = 'auto', minWidth = 'auto', maxWidth = 'auto', offset = '1u', arrow = false, borderRadius = 'container', children, header, headerDivider = 'always', footer, footerDivider = 'never', ...contentContainerProps }) {
+    const defaultId = _react.useId();
+    const id = idProp || defaultId;
+    const contentContainerRef = _react.useRef(null);
+    const contentContainerClassName = (0, _classnames.default)(_popovercss.default.contentContainer, borderRadius === 'container' && _popovercss.default.withBorderRadius, _backgroundcss.default.elevationSurfaceFloatingBackground);
+    const contentContainerStyle = {
+        [_popovercss.customProperties.desiredWidth]: WIDTH_CSS_VALUES[width],
+        [_popovercss.customProperties.desiredMaxWidth]: WIDTH_CSS_VALUES[maxWidth],
+        [_popovercss.customProperties.desiredMinWidth]: WIDTH_CSS_VALUES[minWidth]
+    };
+    const onCalculateLayout = _react.useCallback((data)=>{
+        const element = contentContainerRef.current;
+        if (element == null) return;
+        element.style.setProperty(_popovercss.customProperties.triggerWidth, `${Math.floor(data.reference.width)}px`);
+        element.style.setProperty(_popovercss.customProperties.availableWidth, `${data.available.width}px`);
+        element.style.setProperty(_popovercss.customProperties.availableHeight, `${data.available.height}px`);
+    }, []);
+    const pinRef = _react.useRef(null);
+    const contentHeightRef = _react.useRef(0);
+    const updatePinPosition = _react.useCallback(()=>{
+        pinRef.current?.update();
+    }, []);
+    const onResize = _react.useCallback((contentRect)=>{
+        const contentHeight = contentRect.client?.height ?? 0;
+        if (contentHeightRef.current !== contentHeight) {
+            contentHeightRef.current = contentHeight;
+            updatePinPosition();
+        }
+    }, [
+        updatePinPosition
+    ]);
+    const { ref: scrollableRef, onScroll: onDividerScroll, showHeaderBorder: showHeaderDivider, showFooterBorder: showFooterDivider } = (0, _surface_dividers.useSurfaceDividers)({
+        headerDivider,
+        footerDivider
+    });
+    const handleScroll = _react.useCallback((e)=>{
+        const target = e.target;
+        const scrollTop = target?.scrollTop ?? 0;
+        onScroll?.({
+            scrollTop
+        });
+        onDividerScroll?.();
+    }, [
+        onScroll,
+        onDividerScroll
+    ]);
+    const onOutsidePointerDown = _react.useCallback(({ target })=>{
+        if (onRequestClose && target !== 'reference')
+        onRequestClose();
+    }, [
+        onRequestClose
+    ]);
+    const resolvedTrigger = (0, _trigger.resolveTrigger)({
+        trigger,
+        open,
+        id,
+        role: contentContainerProps.role
+    });
+    const transition = (0, _transition.useSurfaceTransition)({
+        open,
+        transitionDurationMs,
+        onCloseComplete
+    });
+    return (0, _jsxruntime.jsx)(_pin.Pin, {
+        ref: pinRef,
+        placement: placement,
+        enableFlip: enableFlip,
+        enableShift: enableShift,
+        offset: resolveOffset(offset),
+        open: transition.rendering,
+        onOutsidePointerDown: onOutsidePointerDown,
+        blockOutsidePointerEvents: blockOutsidePointerEvents,
+        onCalculateLayout: onCalculateLayout,
+        reference: resolvedTrigger,
+        children: ({ setArrow })=>(0, _jsxruntime.jsx)(_reactmeasure.default, {
+                onResize: onResize,
+                client: true,
+                children: ({ measureRef })=>(0, _jsxruntime.jsx)("div", {
+                        className: transition.opening || transition.open ? _popovercss.default.visible : undefined,
+                        children: (0, _jsxruntime.jsxs)("div", {
+                            className: _popovercss.default.contentWrapper,
+                            children: [
+                                (0, _jsxruntime.jsxs)(_content_container.ContentContainer, {
+                                    ref: (0, _compose_refs.composeRefs)(contentContainerRef, measureRef, scrollableRef),
+                                    className: contentContainerClassName,
+                                    style: contentContainerStyle,
+                                    id: id,
+                                    onRequestEscape: onRequestClose,
+                                    onScroll: handleScroll,
+                                    ...contentContainerProps,
+                                    children: [
+                                        header != null && (0, _jsxruntime.jsx)("div", {
+                                            className: (0, _classnames.default)(_popovercss.default.header, {
+                                                [_popovercss.default.headerBorder]: showHeaderDivider
+                                            }),
+                                            children: header
+                                        }),
+                                        (0, _jsxruntime.jsx)("div", {
+                                            className: _popovercss.default.content,
+                                            children: children
+                                        }),
+                                        footer != null && (0, _jsxruntime.jsx)("div", {
+                                            className: (0, _classnames.default)(_popovercss.default.footer, {
+                                                [_popovercss.default.footerBorder]: showFooterDivider
+                                            }),
+                                            children: footer
+                                        })
+                                    ]
+                                }),
+                                (0, _jsxruntime.jsx)("div", {
+                                    className: (0, _classnames.default)(_popovercss.default.shadowMask, borderRadius === 'container' && _popovercss.default.withBorderRadius)
+                                }),
+                                arrow && (0, _jsxruntime.jsx)(_arrow.Arrow, {
+                                    ref: setArrow,
+                                    placement: placement
+                                })
+                            ]
+                        })
+                    })
+            })
+    });
+}
+const transitionDurationMs = parseInt(_popovercss.default.transitionTime, 10);
+function resolveOffset(offset) {
+    if (typeof offset === 'object') return offset;
+    return {
+        main: offset === '0' ? 0 : parseUnitMultiplier(offset),
+        cross: 0
+    };
+}
+const parseUnitMultiplier = (value)=>parseFloat(value.slice(0, -1)) * _metrics.baseUnit;

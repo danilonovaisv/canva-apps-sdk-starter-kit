@@ -1,0 +1,13 @@
+export type AccessMode = 'keyboard' | 'mouse';
+declare class AccessModeStore {
+    private _accessMode;
+    get isMouseMode(): boolean;
+    get isKeyboardMode(): boolean;
+    get accessMode(): AccessMode;
+    setAccessMode(mode: AccessMode): AccessMode;
+    resetAccessMode(): void;
+}
+export declare const accessModeState: AccessModeStore;
+export declare function useIsMouseAccessMode(): boolean;
+export declare function useIsKeyboardAccessMode(): boolean;
+export {};

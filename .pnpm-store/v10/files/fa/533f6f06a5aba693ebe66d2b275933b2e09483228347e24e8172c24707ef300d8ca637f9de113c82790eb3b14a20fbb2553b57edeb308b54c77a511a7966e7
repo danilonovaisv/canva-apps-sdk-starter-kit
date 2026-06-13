@@ -1,0 +1,27 @@
+const GRADIENT_ID = 'gradient-brand';
+const GRADIENT_COORDINATES = [
+    -7.5,
+    11.5,
+    12.5,
+    31.5
+];
+function createGradientDef(scale) {
+    const [x1, y1, x2, y2] = scale === 1 ? GRADIENT_COORDINATES : GRADIENT_COORDINATES.map((c)=>Math.round(c * scale * 100) / 100);
+    return `<defs>` + `<linearGradient id="${GRADIENT_ID}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">` + `<stop offset="0" stop-color="#03A5AB"/>` + `<stop offset="1" stop-color="#7D2AE8"/>` + `</linearGradient>` + `</defs>`;
+}
+const CURRENT_COLOR_REGEX = /(fill|stroke)="currentColor"/g;
+const VIEWBOX_REGEX = /viewBox="0 0 ([\d.]+)/;
+const SVG_OPEN_TAG_REGEX = /<svg([^>]*)>/;
+export function applyBrandGradient(glyph) {
+    let matched = false;
+    const glyphWithGradientRefs = glyph.replace(CURRENT_COLOR_REGEX, (_, attr)=>{
+        matched = true;
+        return `${attr}="url(#${GRADIENT_ID})"`;
+    });
+    if (!matched) return glyph;
+    return glyphWithGradientRefs.replace(SVG_OPEN_TAG_REGEX, (_, attrs)=>{
+        const viewBoxMatch = attrs.match(VIEWBOX_REGEX);
+        const scale = viewBoxMatch ? parseFloat(viewBoxMatch[1]) / 24 : 1;
+        return `<svg${attrs}>${createGradientDef(scale)}`;
+    });
+}

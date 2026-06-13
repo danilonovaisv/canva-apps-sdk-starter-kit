@@ -1,0 +1,1 @@
+export { InteractionManager, useInteractionLayer } from './private/interaction_manager';

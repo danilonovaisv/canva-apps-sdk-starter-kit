@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { colorControlBorder: "var(--igdHlg)", colorControlCriticalBorder: "var(--BhjlKg)", colorUiBorder: "var(--enMi_w)", controlBorder: "ZIgwEA", controlCriticalBorder: "cT3dPQ", uiBorder: "wi6shg", controlBorderTop: "_76d0UQ", controlCriticalBorderTop: "QxJ1bQ", uiBorderTop: "_3mOaJw", noneBorderTop: "pC_IVw", controlBorderBottom: "PLY5sQ", controlCriticalBorderBottom: "nj7zeg", uiBorderBottom: "_5RET2g", noneBorderBottom: "qTxuVA", controlBorderStart: "_zbGxw", controlCriticalBorderStart: "JM6nmg", uiBorderStart: "TdKXVg", noneBorderStart: "RM3_kQ", controlBorderEnd: "ZcgWSA", controlCriticalBorderEnd: "OQuckA", uiBorderEnd: "_7qMD_Q", noneBorderEnd: "GiYUqg" };
+export default styles;
+export const customProperties = { colorControlBorder: "--igdHlg", colorControlCriticalBorder: "--BhjlKg", colorUiBorder: "--enMi_w" };
+const dictStyles = { "colorControlBorder": "var(--igdHlg)", "colorControlCriticalBorder": "var(--BhjlKg)", "colorUiBorder": "var(--enMi_w)", "controlBorder": "ZIgwEA", "controlCriticalBorder": "cT3dPQ", "uiBorder": "wi6shg", "controlBorderTop": "_76d0UQ", "controlCriticalBorderTop": "QxJ1bQ", "uiBorderTop": "_3mOaJw", "noneBorderTop": "pC_IVw", "controlBorderBottom": "PLY5sQ", "controlCriticalBorderBottom": "nj7zeg", "uiBorderBottom": "_5RET2g", "noneBorderBottom": "qTxuVA", "controlBorderStart": "_zbGxw", "controlCriticalBorderStart": "JM6nmg", "uiBorderStart": "TdKXVg", "noneBorderStart": "RM3_kQ", "controlBorderEnd": "ZcgWSA", "controlCriticalBorderEnd": "OQuckA", "uiBorderEnd": "_7qMD_Q", "noneBorderEnd": "GiYUqg" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

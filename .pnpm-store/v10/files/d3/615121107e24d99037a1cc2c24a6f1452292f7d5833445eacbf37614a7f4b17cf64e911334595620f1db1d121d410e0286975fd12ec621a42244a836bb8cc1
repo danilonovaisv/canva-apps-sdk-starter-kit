@@ -1,0 +1,69 @@
+"use strict"
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "flags", {
+    enumerable: true,
+    get: function() {
+        return flags;
+    }
+});
+const _flagscss = _interop_require_default(require("../flags.css"));
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
+const flags = {
+    get enableHighContrastOverride() {
+        return {
+            value: false
+        };
+    },
+    get enableButtonLoadingScan() {
+        return {
+            value: false
+        };
+    },
+    get enableModernisedRadius() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselModernisedRadius
+        };
+    },
+    get enableModernisedElevation() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselModernisedElevation
+        };
+    },
+    get enableModernisedTactility() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselModernisedTactility
+        };
+    },
+    get enableModernisedDarkMode() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselModernisedDarkMode
+        };
+    },
+    get enableEaselButtonReducedMinWidth() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselButtonReducedMinWidth
+        };
+    },
+    get enableUnifiedSheetHeaders() {
+        return {
+            value: false
+        };
+    },
+    get enableEaselNotoSansThaiFont() {
+        return {
+            value: false,
+            className: _flagscss.default.enableEaselNotoSansThaiFont
+        };
+    }
+};

@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.customProperties = void 0;
+exports.getStyle = getStyle;
+function Struct() { }
+function Dict() { }
+const styles = { internalItemHeight: "var(--5IuC1Q, calc(var(----lgQg, 0.1rem)*8*5))", internalPadding: "var(--z8oLkw, 8px 16px)", baseUnitInRem: "calc(var(----lgQg, 0.1rem)*8)", menuItemPlaceholder: "vC_rrQ", startIcon: "jNNffA" };
+exports.default = styles;
+exports.customProperties = { internalItemHeight: "--5IuC1Q", internalPadding: "--z8oLkw" };
+const dictStyles = { "internalItemHeight": "var(--5IuC1Q, calc(var(----lgQg, 0.1rem)*8*5))", "internalPadding": "var(--z8oLkw, 8px 16px)", "baseUnitInRem": "calc(var(----lgQg, 0.1rem)*8)", "menuItemPlaceholder": "vC_rrQ", "startIcon": "jNNffA" };
+function getStyle(style) {
+    return dictStyles[style];
+}
+;

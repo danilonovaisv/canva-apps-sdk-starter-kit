@@ -1,0 +1,9 @@
+import * as React from 'react';
+export type SheetPositionerControls = {
+    handleSnap: () => void
+    cancelSnap: () => void
+    scheduleUpdate: (callback: () => void) => void
+    ref: React.RefObject<HTMLDivElement | null>
+    setDragOffset: (position: number) => void
+};
+export declare function useSheetPositioner(enableAnimations?: boolean): SheetPositionerControls;

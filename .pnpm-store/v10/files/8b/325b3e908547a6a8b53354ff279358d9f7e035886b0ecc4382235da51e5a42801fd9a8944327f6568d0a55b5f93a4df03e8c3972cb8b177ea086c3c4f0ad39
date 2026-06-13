@@ -1,0 +1,29 @@
+import type { TokenExtractor } from "./types.js";
+/**
+ * @public
+ * Factory functions for extracting JWT tokens from various sources.
+ * Use these with the `tokenExtractor` option in `user.verifyToken()`.
+ */
+export declare const tokenExtractors: {
+  /**
+   * Extracts a JWT token from the Authorization header using the Bearer scheme.
+   *
+   * @returns A token extractor function
+   */
+  fromBearerAuth(): TokenExtractor;
+  /**
+   * Extracts a JWT token from a query string parameter.
+   *
+   * @param paramName - The name of the query parameter
+   * @returns A token extractor function
+   */
+  fromQuery(paramName: string): TokenExtractor;
+  /**
+   * Extracts a JWT token from a cookie.
+   * Requires cookie-parser middleware or similar to parse cookies.
+   *
+   * @param cookieName - The name of the cookie
+   * @returns A token extractor function
+   */
+  fromCookie(cookieName: string): TokenExtractor;
+};

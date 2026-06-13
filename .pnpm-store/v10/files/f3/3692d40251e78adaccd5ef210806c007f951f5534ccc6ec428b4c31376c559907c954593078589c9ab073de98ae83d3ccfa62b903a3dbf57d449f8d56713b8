@@ -1,0 +1,50 @@
+import type { RequestHandler } from "express";
+import type { UserAuthOptions } from "./types.js";
+/**
+ * Creates Express middleware for verifying Canva user JWT tokens obtained through https://www.canva.dev/docs/apps/api/latest/user-auth-get-canva-user-token/.
+ *
+ * @param options - Configuration options
+ * @returns Express middleware
+ */
+declare function createVerifyMiddleware({
+  appId,
+  tokenExtractor,
+  cacheMaxAgeMinutes,
+  timeoutMs,
+  baseUrl,
+}: UserAuthOptions): RequestHandler;
+/**
+ * @public
+ * User token authentication namespace.
+ * Provides middleware for verifying Canva user JWT tokens.
+ */
+export declare const user: {
+  /**
+   * Creates Express middleware for verifying Canva user JWT tokens.
+   * When verification succeeds, adds user context to `req.canva.user`.
+   *
+   * @param options - Configuration options
+   * @returns Express middleware that verifies JWT tokens
+   *
+   * @example
+   * Basic usage with default Authorization header:
+   * ```typescript
+   * import { user } from '@canva/app-middleware/express';
+   *
+   * app.use(user.verifyToken({ appId: 'your-app-id' }));
+   * ```
+   *
+   * @example
+   * With custom token extraction:
+   * ```typescript
+   * import { user, tokenExtractors } from '@canva/app-middleware/express';
+   *
+   * app.use(user.verifyToken({
+   *   appId: 'your-app-id',
+   *   tokenExtractor: tokenExtractors.fromQuery('token')
+   * }));
+   * ```
+   */
+  verifyToken: typeof createVerifyMiddleware;
+};
+export {};

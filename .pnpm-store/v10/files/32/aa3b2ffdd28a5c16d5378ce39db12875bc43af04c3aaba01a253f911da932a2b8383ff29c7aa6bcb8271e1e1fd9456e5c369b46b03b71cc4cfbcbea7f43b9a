@@ -1,0 +1,69 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { Preconditions } from '../../../../base/preconditions';
+import * as React from 'react';
+import { EaselFlagsProvider, useEaselFlags } from '../../flags/flags';
+import { InteractionManager } from '../../layer/interaction_manager/interaction_manager';
+const EaselContext = React.createContext(null);
+export function EaselProvider({ enableAnimations = true, direction, disableFocusTraps, enableUserSelection, theme, enableHighColorContrast, autoplayVideos, disableDialogBlur, enableButtonLoadingScan, enableModernisedUI, expectedPixelsPerRem, children }) {
+    const flagOverrides = {
+        enableButtonLoadingScan,
+        ...(enableModernisedUI != null && {
+            enableModernisedRadius: enableModernisedUI,
+            enableModernisedElevation: enableModernisedUI,
+            enableModernisedTactility: enableModernisedUI,
+            enableModernisedDarkMode: enableModernisedUI
+        })
+    };
+    return _jsx(InteractionManager, {
+        children: _jsx(EaselFlagsProvider, {
+            overrides: flagOverrides,
+            children: _jsx(EaselContext, {
+                value: {
+                    enableAnimations,
+                    direction,
+                    disableFocusTraps,
+                    enableUserSelection,
+                    theme,
+                    enableHighColorContrast,
+                    autoplayVideos,
+                    disableDialogBlur,
+                    expectedPixelsPerRem
+                },
+                children: children
+            })
+        })
+    });
+}
+function useEaselContext() {
+    return Preconditions.checkExists(React.useContext(EaselContext), 'Did you forget to render a provider?');
+}
+export function useEnableAnimations() {
+    return useEaselContext().enableAnimations;
+}
+export function useDirection() {
+    return useEaselContext().direction;
+}
+export function useDisableFocusTraps() {
+    return useEaselContext().disableFocusTraps;
+}
+export function useEnableUserSelection() {
+    return useEaselContext().enableUserSelection;
+}
+export function useTheme() {
+    return useEaselContext().theme;
+}
+export function useEnableHighColorContrast() {
+    return useEaselContext().enableHighColorContrast;
+}
+export function useAutoplayVideos() {
+    return useEaselContext().autoplayVideos;
+}
+export function useDisableDialogBlur() {
+    return useEaselContext().disableDialogBlur;
+}
+export function useEnableButtonLoadingScan() {
+    return useEaselFlags()?.enableButtonLoadingScan ?? false;
+}
+export function useExpectedPixelsPerRem() {
+    return useEaselContext().expectedPixelsPerRem;
+}

@@ -1,0 +1,4 @@
+import { exposeTestIds } from '../../../test_ids/test_ids';
+export const BaseButtonTestIds = exposeTestIds ? {
+    button: 'sp8kg5'
+} : {};

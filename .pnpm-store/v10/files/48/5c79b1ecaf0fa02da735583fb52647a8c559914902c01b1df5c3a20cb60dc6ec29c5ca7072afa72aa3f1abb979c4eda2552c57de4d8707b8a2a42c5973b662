@@ -1,0 +1,10 @@
+function Struct() { }
+function Dict() { }
+const styles = { enableEaselModernisedRadius: ":global(.etxqji5)", radius04: "4px", radius06: "6px", radius08: "8px", radius10: "10px", radius12: "12px", radius14: "14px", radius16: "16px", radius20: "20px", radius24: "24px", radius32: "32px", radiusFull: "9999px", radiusElementSharpest: "var(--RoJ4XQ)", radiusElementSharp: "var(--D3shaw)", radiusElementStandard: "var(--0iDYqA)", radiusElementSoft: "var(--TikWyw)", radiusElementSoftest: "var(--MztNWw)", radiusElementRound: "var(--aiHVUg)", radiusContainerSharp: "var(--u88V_A)", radiusContainerStandard: "var(--HVI3oQ)", radiusContainerSoft: "var(--VlSHbw)", radiusContainerSoftest: "var(--t1OTeg)" };
+export default styles;
+export const customProperties = { radiusElementSharpest: "--RoJ4XQ", radiusElementSharp: "--D3shaw", radiusElementStandard: "--0iDYqA", radiusElementSoft: "--TikWyw", radiusElementSoftest: "--MztNWw", radiusElementRound: "--aiHVUg", radiusContainerSharp: "--u88V_A", radiusContainerStandard: "--HVI3oQ", radiusContainerSoft: "--VlSHbw", radiusContainerSoftest: "--t1OTeg" };
+const dictStyles = { "enableEaselModernisedRadius": ":global(.etxqji5)", "radius04": "4px", "radius06": "6px", "radius08": "8px", "radius10": "10px", "radius12": "12px", "radius14": "14px", "radius16": "16px", "radius20": "20px", "radius24": "24px", "radius32": "32px", "radiusFull": "9999px", "radiusElementSharpest": "var(--RoJ4XQ)", "radiusElementSharp": "var(--D3shaw)", "radiusElementStandard": "var(--0iDYqA)", "radiusElementSoft": "var(--TikWyw)", "radiusElementSoftest": "var(--MztNWw)", "radiusElementRound": "var(--aiHVUg)", "radiusContainerSharp": "var(--u88V_A)", "radiusContainerStandard": "var(--HVI3oQ)", "radiusContainerSoft": "var(--VlSHbw)", "radiusContainerSoftest": "var(--t1OTeg)" };
+export function getStyle(style) {
+    return dictStyles[style];
+}
+;

@@ -1,0 +1,5 @@
+import { exposeTestIds } from '../../../test_ids/test_ids';
+export const BaseInputTestIds = exposeTestIds ? {
+    wrapper: 'uejt1k',
+    textField: '2ppmc8s'
+} : {};

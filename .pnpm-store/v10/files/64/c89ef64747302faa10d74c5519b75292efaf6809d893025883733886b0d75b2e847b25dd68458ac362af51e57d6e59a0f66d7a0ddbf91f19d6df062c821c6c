@@ -1,0 +1,440 @@
+# @canva/app-middleware
+
+Utilities and Express.js middleware for verifying Canva JWT tokens.
+
+![](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white)
+
+## Table of contents
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+  - [Core function](#core-function)
+  - [Express middleware](#express-middleware)
+- [API](#api)
+  - [Core functions](#core-functions)
+  - [Express middleware](#express-middleware-api)
+- [Token extraction](#token-extraction)
+- [Error handling](#error-handling)
+- [Debugging](#debugging)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Introduction
+
+The `@canva/app-middleware` package provides tools for building with Canva's Apps SDK. This SDK simplifies authentication for backend services that need to verify requests from Canva apps.
+
+**Two ways to use this package:**
+
+1. **Core function** (main export) - Works in any Node.js environment (Next.js, AWS Lambda, Cloudflare Workers, Fastify, Hono, etc.)
+2. **Express middleware** (`/express`) - Ready-to-use middleware for Express.js applications
+
+## Installation
+
+```bash
+npm install @canva/app-middleware
+```
+
+## Quick start
+
+### Core function
+
+Use the `initUserTokenVerifier` factory to create a verifier, then call `.verify()` per request:
+
+```typescript
+import { initUserTokenVerifier } from "@canva/app-middleware";
+
+// Initialize once at app startup
+const verifier = initUserTokenVerifier({
+  appId: process.env.CANVA_APP_ID,
+});
+
+// Verify tokens per request
+const payload = await verifier.verify(token);
+console.log(payload.userId, payload.brandId);
+```
+
+#### Next.js API Route Example
+
+```typescript
+import {
+  initUserTokenVerifier,
+  TokenInvalidError,
+} from "@canva/app-middleware";
+
+// Initialize once at module level
+const verifier = initUserTokenVerifier({
+  appId: process.env.CANVA_APP_ID!,
+});
+
+export async function GET(request: Request) {
+  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    return Response.json({ error: "Missing token" }, { status: 401 });
+  }
+
+  try {
+    const payload = await verifier.verify(token);
+
+    return Response.json({
+      userId: payload.userId,
+      brandId: payload.brandId,
+    });
+  } catch (error) {
+    if (error instanceof TokenInvalidError) {
+      return Response.json({ error: "Invalid token" }, { status: 401 });
+    }
+    throw error;
+  }
+}
+```
+
+#### AWS Lambda Example
+
+```typescript
+import { initUserTokenVerifier } from "@canva/app-middleware";
+
+// Initialize once outside the handler (reused across invocations)
+const verifier = initUserTokenVerifier({
+  appId: process.env.CANVA_APP_ID,
+});
+
+export const handler = async (event) => {
+  const token = event.headers.authorization?.replace("Bearer ", "");
+
+  try {
+    const payload = await verifier.verify(token);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ userId: payload.userId }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: "Unauthorized" }),
+    };
+  }
+};
+```
+
+### Express middleware
+
+```typescript
+import express from "express";
+import { user } from "@canva/app-middleware/express";
+
+const app = express();
+const APP_ID = process.env.CANVA_APP_ID;
+
+// Apply middleware to protected routes
+app.use("/api", user.verifyToken({ appId: APP_ID }));
+
+app.get("/api/user", (req, res) => {
+  // Access the decoded JWT payload
+  const { appId, userId, brandId } = req.canva.user;
+  res.json({ appId, userId, brandId });
+});
+
+app.listen(3000);
+```
+
+## API
+
+### Core Functions
+
+#### initUserTokenVerifier()
+
+Creates a verifier for Canva user JWT tokens. The verifier caches JWKS public keys according to the configured settings.
+
+```typescript
+import { initUserTokenVerifier } from "@canva/app-middleware";
+
+const verifier = initUserTokenVerifier(options: UserTokenVerifierOptions): UserTokenVerifier;
+```
+
+##### Options
+
+```typescript
+type UserTokenVerifierOptions = {
+  /** The ID of your Canva app (required) */
+  appId: string;
+
+  /** JWKS cache duration in minutes (default: 60) */
+  cacheMaxAgeMinutes?: number;
+
+  /** JWKS fetch timeout in milliseconds (default: 30000) */
+  timeoutMs?: number;
+
+  /** Base URL for JWKS endpoint (default: https://api.canva.com) */
+  baseUrl?: string;
+};
+```
+
+##### Return value
+
+```typescript
+type UserTokenVerifier = {
+  /**
+   * Verifies a Canva user JWT token and returns the decoded payload.
+   * @param token - The JWT token to verify
+   * @throws {TokenInvalidError} When the token is malformed or has an invalid signature
+   * @throws {TokenExpiredError} When the token has expired
+   */
+  verify(token: string): Promise<UserTokenPayload>;
+};
+
+type UserTokenPayload = {
+  appId: string; // The ID of the app
+  userId: string; // The ID of the user
+  brandId: string; // The ID of the user's team
+};
+```
+
+### Express Middleware API
+
+#### user.verifyToken()
+
+Creates Express middleware for verifying Canva user JWT tokens obtained through [auth.getCanvaUserToken](https://www.canva.dev/docs/apps/api/latest/user-auth-get-canva-user-token/). By default, this middleware extracts the token from the `Authorization` header with a `Bearer` scheme.
+
+```typescript
+import { user } from "@canva/app-middleware/express";
+
+user.verifyToken(options: UserAuthOptions): RequestHandler;
+```
+
+##### Options
+
+```typescript
+type UserAuthOptions = {
+  /** The ID of your Canva app (required) */
+  appId: string;
+
+  /** Optional token extractor function */
+  tokenExtractor?: TokenExtractor;
+
+  /** JWKS cache duration in minutes (default: 60) */
+  cacheMaxAgeMinutes?: number;
+
+  /** JWKS fetch timeout in milliseconds (default: 30000) */
+  timeoutMs?: number;
+
+  /** Base URL for JWKS endpoint (default: https://api.canva.com) */
+  baseUrl?: string;
+};
+```
+
+| Parameter            | Type             | Description                                                                                                |
+| -------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| `appId`              | `string`         | **Required.** The ID of your Canva app from the [Developer Portal](https://www.canva.com/developers/apps). |
+| `tokenExtractor`     | `TokenExtractor` | Optional. Function to extract tokens from requests. Defaults to `tokenExtractors.fromBearerAuth()`.        |
+| `cacheMaxAgeMinutes` | `number`         | Optional. Duration to cache public keys (default: 60 minutes).                                             |
+| `timeoutMs`          | `number`         | Optional. Timeout for fetching JWKS (default: 30 seconds).                                                 |
+| `baseUrl`            | `string`         | Optional. Override the Canva API base URL (default: https://api.canva.com).                                |
+
+##### Request augmentation
+
+When a JWT is successfully verified, the middleware adds user context to the request:
+
+```typescript
+type Request = {
+  canva: {
+    user: {
+      appId: string; // The ID of the app
+      userId: string; // The ID of the user
+      brandId: string; // The ID of the user's team
+    };
+  };
+};
+```
+
+##### How it works
+
+The middleware:
+
+1. Extracts the JWT from the request using the provided token extractor
+2. Decodes the JWT header to get the key ID (`kid`)
+3. Fetches the public key from Canva's [JWKS endpoint](https://www.canva.dev/docs/apps/verifying-jwts/#step-4-get-the-active-public-key) (`https://api.canva.com/rest/v1/apps/{appId}/jwks`)
+4. Verifies the JWT signature and validates the audience claim
+5. Adds the decoded payload to `req.canva.user`
+
+Public keys are cached for 60 minutes by default to improve performance and reduce load on the JWKS endpoint.
+
+## Token extraction
+
+The Express middleware provides built-in token extractors for common scenarios.
+
+### From Authorization header (default)
+
+By default, the middleware extracts the JWT from the `Authorization` header with a `Bearer` scheme:
+
+```typescript
+import { user } from "@canva/app-middleware/express";
+
+app.use("/api", user.verifyToken({ appId: APP_ID }));
+```
+
+This expects requests with:
+
+```
+Authorization: Bearer <token>
+```
+
+### From query string
+
+For scenarios where headers cannot be used (e.g., webhooks, redirects, or certain iframe contexts):
+
+```typescript
+import { user, tokenExtractors } from "@canva/app-middleware/express";
+
+// Extract token from ?canva_user_token=<token>
+app.use(
+  "/webhook",
+  user.verifyToken({
+    appId: APP_ID,
+    tokenExtractor: tokenExtractors.fromQuery("canva_user_token"),
+  }),
+);
+```
+
+### From cookies
+
+Extract tokens from cookies (requires `cookie-parser` middleware):
+
+```typescript
+import cookieParser from "cookie-parser";
+import { user, tokenExtractors } from "@canva/app-middleware/express";
+
+app.use(cookieParser());
+app.use(
+  "/api",
+  user.verifyToken({
+    appId: APP_ID,
+    tokenExtractor: tokenExtractors.fromCookie("canva_token"),
+  }),
+);
+```
+
+### Custom token extraction
+
+You can provide a custom function to extract tokens from any location:
+
+```typescript
+import { user, type TokenExtractor } from "@canva/app-middleware/express";
+import { TokenMissingError } from "@canva/app-middleware";
+
+const customExtractor: TokenExtractor = (req) => {
+  // Extract from custom header
+  const token = req.header("X-Canva-Token");
+  if (!token) {
+    throw new TokenMissingError("Missing X-Canva-Token header");
+  }
+  return token;
+};
+
+app.use(
+  "/api",
+  user.verifyToken({
+    appId: APP_ID,
+    tokenExtractor: customExtractor,
+  }),
+);
+```
+
+## Error handling
+
+The SDK uses a structured error hierarchy for precise error handling.
+
+### Error types
+
+All authentication errors extend `UserAuthError`:
+
+```typescript
+import {
+  UserAuthError,
+  TokenMissingError,
+  TokenExpiredError,
+  TokenInvalidError,
+  AppIdMismatchError,
+} from "@canva/app-middleware";
+```
+
+| Error Class          | Code              | Status Code | Description                               |
+| -------------------- | ----------------- | ----------- | ----------------------------------------- |
+| `TokenMissingError`  | `TOKEN_MISSING`   | 401         | JWT token not found in request            |
+| `TokenExpiredError`  | `TOKEN_EXPIRED`   | 401         | Token has expired (includes `expiredAt`)  |
+| `TokenInvalidError`  | `TOKEN_INVALID`   | 401         | Invalid signature or malformed token      |
+| `AppIdMismatchError` | `APP_ID_MISMATCH` | 401         | Token `aud` doesn't match expected app ID |
+
+All errors include a `statusCode` property that can be used directly when sending HTTP responses.
+
+### Express error handling example
+
+```typescript
+import express from "express";
+import { user } from "@canva/app-middleware/express";
+import { UserAuthError, TokenExpiredError } from "@canva/app-middleware";
+
+const app = express();
+
+app.use("/api", user.verifyToken({ appId: process.env.CANVA_APP_ID }));
+
+app.get("/api/user", (req, res) => {
+  res.json(req.canva.user);
+});
+
+// Error handler must be defined after routes
+app.use((err, req, res, next) => {
+  if (err instanceof TokenExpiredError) {
+    return res.status(err.statusCode).json({
+      error: err.code,
+      message: "Session expired",
+    });
+  }
+
+  // Handle other UserAuthError instances
+  if (err instanceof UserAuthError) {
+    return res.status(err.statusCode).json({
+      error: err.code,
+      message: err.message,
+    });
+  }
+
+  next(err);
+});
+```
+
+### Best practices
+
+- Always add error-handling middleware after your protected routes
+- Use the structured error hierarchy to provide specific error messages
+- Avoid exposing detailed error messages to clients in production
+- Log errors for debugging and monitoring purposes
+
+## Debugging
+
+Enable debug logging by setting the `DEBUG` environment variable:
+
+```bash
+DEBUG=canva:app:middleware npm start
+```
+
+This logs information about JWT processing, including:
+
+- Token extraction attempts
+- Decoded payloads (after verification)
+- Fallback extractor chains
+- Any errors encountered
+
+## Changelog
+
+See the `CHANGELOG.md` file.
+
+## Contributing
+
+We're actively developing this package but are not currently accepting third-party contributions. If you'd like to request any changes or additions to the package, submit a feature request via the [Canva Developers Community](https://community.canva.dev/).
+
+## License
+
+See the `LICENSE.md` file.

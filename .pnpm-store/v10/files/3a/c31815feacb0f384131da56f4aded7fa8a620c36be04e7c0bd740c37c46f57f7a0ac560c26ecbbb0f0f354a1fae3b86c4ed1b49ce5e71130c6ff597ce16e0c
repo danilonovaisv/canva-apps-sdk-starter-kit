@@ -1,0 +1,14 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import classNames from 'classnames';
+import 'react';
+import { BaseButton } from '../../../button/base_button/base_button';
+import styles from './dismiss_area.css';
+import { DismissAreaMessages } from './dismiss_area.messages';
+export function DismissArea({ onClick, className }) {
+    return _jsx(BaseButton, {
+        ariaLabel: DismissAreaMessages.close(),
+        className: classNames(styles.dismissArea, className),
+        onClick: onClick,
+        tabIndex: -1
+    });
+}

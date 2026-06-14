@@ -94,254 +94,268 @@ export function getStarPath(cx: number, cy: number, r: number): string {
 const g = globalThis as any;
 
 // Tag / Content Badge App Element
-export const tagElementClient = g.tagElementClient || (g.tagElementClient = initAppElement<any>({
-  render: (data) => {
-    const w = 150;
-    const h = 32;
-    const r = 16; // Pill style
+export const tagElementClient =
+  g.tagElementClient ||
+  (g.tagElementClient = initAppElement<any>({
+    render: (data) => {
+      const w = 150;
+      const h = 32;
+      const r = 16; // Pill style
 
-    const tagColors: Record<string, { bg: string; text: string }> = {
-      essencial: { bg: BRAND_TOKENS.AZUL_NUVEM, text: BRAND_TOKENS.AZUL_NOITE },
-      alugar: { bg: BRAND_TOKENS.LILAC_WASH, text: BRAND_TOKENS.CINZA_QUENTE },
-      depois: { bg: BRAND_TOKENS.ROSA_WASH, text: BRAND_TOKENS.ROSA_DOCE },
-      dica: { bg: BRAND_TOKENS.AZUL_NOITE, text: BRAND_TOKENS.DOURADO },
-      "nao-recomendo": {
-        bg: BRAND_TOKENS.CINZA_CLARO,
-        text: BRAND_TOKENS.CINZA_QUENTE,
-      },
-    };
+      const tagColors: Record<string, { bg: string; text: string }> = {
+        essencial: {
+          bg: BRAND_TOKENS.AZUL_NUVEM,
+          text: BRAND_TOKENS.AZUL_NOITE,
+        },
+        alugar: {
+          bg: BRAND_TOKENS.LILAC_WASH,
+          text: BRAND_TOKENS.CINZA_QUENTE,
+        },
+        depois: { bg: BRAND_TOKENS.ROSA_WASH, text: BRAND_TOKENS.ROSA_DOCE },
+        dica: { bg: BRAND_TOKENS.AZUL_NOITE, text: BRAND_TOKENS.DOURADO },
+        "nao-recomendo": {
+          bg: BRAND_TOKENS.CINZA_CLARO,
+          text: BRAND_TOKENS.CINZA_QUENTE,
+        },
+      };
 
-    const colors = (tagColors[data.type] || tagColors.essencial) as {
-      bg: string;
-      text: string;
-    };
+      const colors = (tagColors[data.type] || tagColors.essencial) as {
+        bg: string;
+        text: string;
+      };
 
-    return [
-      // Background Pill Shape
-      {
-        type: "shape",
-        paths: [
-          {
-            d: getRoundedRectPath(w, h, r),
-            fill: { color: colors.bg, dropTarget: false },
-          },
-        ],
-        viewBox: { left: 0, top: 0, width: w, height: h },
-        top: 0,
-        left: 0,
-        width: w,
-        height: h,
-      },
-      // Text block inside (fully editable)
-      {
-        type: "text",
-        children: [data.labelText || data.type.toUpperCase()],
-        top: 8,
-        left: 12,
-        width: w - 24,
-        fontSize: 10,
-        textAlign: "center",
-        color: colors.text,
-        fontWeight: "semibold",
-        fontStyle: "normal",
-      },
-    ];
-  },
-}));
+      return [
+        // Background Pill Shape
+        {
+          type: "shape",
+          paths: [
+            {
+              d: getRoundedRectPath(w, h, r),
+              fill: { color: colors.bg, dropTarget: false },
+            },
+          ],
+          viewBox: { left: 0, top: 0, width: w, height: h },
+          top: 0,
+          left: 0,
+          width: w,
+          height: h,
+        },
+        // Text block inside (fully editable)
+        {
+          type: "text",
+          children: [data.labelText || data.type.toUpperCase()],
+          top: 8,
+          left: 12,
+          width: w - 24,
+          fontSize: 10,
+          textAlign: "center",
+          color: colors.text,
+          fontWeight: "semibold",
+          fontStyle: "normal",
+        },
+      ];
+    },
+  }));
 
 // CTA Buy Button App Element
-export const buyButtonClient = g.buyButtonClient || (g.buyButtonClient = initAppElement<any>({
-  render: (data) => {
-    const w = 240;
-    const h = 48;
-    const r = 24;
+export const buyButtonClient =
+  g.buyButtonClient ||
+  (g.buyButtonClient = initAppElement<any>({
+    render: (data) => {
+      const w = 240;
+      const h = 48;
+      const r = 24;
 
-    const bg =
-      data.accent === "azul" ? BRAND_TOKENS.AZUL_SUAVE : BRAND_TOKENS.ROSA_DOCE;
-    const strokeColor =
-      data.partnerLevel === "3" ? BRAND_TOKENS.DOURADO : undefined;
+      const bg =
+        data.accent === "azul"
+          ? BRAND_TOKENS.AZUL_SUAVE
+          : BRAND_TOKENS.ROSA_DOCE;
+      const strokeColor =
+        data.partnerLevel === "3" ? BRAND_TOKENS.DOURADO : undefined;
 
-    const shapes = [
-      {
-        d: getRoundedRectPath(w, h, r),
-        fill: { color: bg, dropTarget: false },
-        stroke: strokeColor
-          ? { weight: 2, color: strokeColor, strokeAlign: "inset" as const }
-          : undefined,
-      },
-    ];
+      const shapes = [
+        {
+          d: getRoundedRectPath(w, h, r),
+          fill: { color: bg, dropTarget: false },
+          stroke: strokeColor
+            ? { weight: 2, color: strokeColor, strokeAlign: "inset" as const }
+            : undefined,
+        },
+      ];
 
-    return [
-      {
-        type: "shape",
-        paths: shapes,
-        viewBox: { left: 0, top: 0, width: w, height: h },
-        top: 0,
-        left: 0,
-        width: w,
-        height: h,
-      },
-      {
-        type: "text",
-        children: [data.text || "Comprar agora"],
-        top: 15,
-        left: 20,
-        width: w - 40,
-        fontSize: 12,
-        textAlign: "center",
-        color: "#FFFFFF",
-        fontWeight: "bold",
-      },
-    ];
-  },
-}));
+      return [
+        {
+          type: "shape",
+          paths: shapes,
+          viewBox: { left: 0, top: 0, width: w, height: h },
+          top: 0,
+          left: 0,
+          width: w,
+          height: h,
+        },
+        {
+          type: "text",
+          children: [data.text || "Comprar agora"],
+          top: 15,
+          left: 20,
+          width: w - 40,
+          fontSize: 12,
+          textAlign: "center",
+          color: "#FFFFFF",
+          fontWeight: "bold",
+        },
+      ];
+    },
+  }));
 
 // Premium Partner Card App Element
-export const partnerCardClient = g.partnerCardClient || (g.partnerCardClient = initAppElement<any>({
-  render: (data) => {
-    const w = 400;
-    const h = 550;
-    const pad = 24;
+export const partnerCardClient =
+  g.partnerCardClient ||
+  (g.partnerCardClient = initAppElement<any>({
+    render: (data) => {
+      const w = 400;
+      const h = 550;
+      const pad = 24;
 
-    const dashedBorderDataUrl = createDashedBorderDataUrl(
-      w - pad * 2,
-      80,
-      BRAND_TOKENS.DOURADO,
-    );
+      const dashedBorderDataUrl = createDashedBorderDataUrl(
+        w - pad * 2,
+        80,
+        BRAND_TOKENS.DOURADO,
+      );
 
-    return [
-      // Fundo Card (Azul Noite)
-      {
-        type: "shape",
-        paths: [
-          {
-            d: getRoundedRectPath(w, h, 20),
-            fill: { color: BRAND_TOKENS.AZUL_NOITE, dropTarget: false },
-            stroke: {
-              weight: 1.5,
-              color: BRAND_TOKENS.DOURADO,
-              strokeAlign: "inset" as const,
+      return [
+        // Fundo Card (Azul Noite)
+        {
+          type: "shape",
+          paths: [
+            {
+              d: getRoundedRectPath(w, h, 20),
+              fill: { color: BRAND_TOKENS.AZUL_NOITE, dropTarget: false },
+              stroke: {
+                weight: 1.5,
+                color: BRAND_TOKENS.DOURADO,
+                strokeAlign: "inset" as const,
+              },
             },
-          },
-        ],
-        viewBox: { left: 0, top: 0, width: w, height: h },
-        top: 0,
-        left: 0,
-        width: w,
-        height: h,
-      },
-      // Header Label (Montserrat)
-      {
-        type: "text",
-        children: ["PARCEIRA PREMIUM"],
-        top: pad + 10,
-        left: pad,
-        width: w - pad * 2,
-        fontSize: 10,
-        color: BRAND_TOKENS.DOURADO,
-        fontWeight: "bold",
-        textAlign: "start",
-      },
-      // Partner Name (Johnny / Roboto Condensed)
-      {
-        type: "text",
-        children: [data.partnerName],
-        top: pad + 30,
-        left: pad,
-        width: w - pad * 2,
-        fontSize: 32,
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        textAlign: "start",
-      },
-      // Partner Description
-      {
-        type: "text",
-        children: [data.description],
-        top: pad + 90,
-        left: pad,
-        width: w - pad * 2,
-        fontSize: 13,
-        color: BRAND_TOKENS.CREME,
-        fontWeight: "normal",
-        textAlign: "start",
-      },
-      // Dashed Coupon Frame (Canvas Placeholder)
-      {
-        type: "image",
-        dataUrl: dashedBorderDataUrl,
-        top: 260,
-        left: pad,
-        width: w - pad * 2,
-        height: 80,
-        altText: { text: "Cupom dashed border", decorative: true },
-      },
-      // Coupon text labels inside the frame
-      {
-        type: "text",
-        children: ["CUPOM EXCLUSIVO"],
-        top: 275,
-        left: pad + 20,
-        width: w - pad * 2 - 40,
-        fontSize: 10,
-        color: BRAND_TOKENS.CINZA_QUENTE,
-        fontWeight: "semibold",
-        textAlign: "center",
-      },
-      {
-        type: "text",
-        children: [data.code],
-        top: 295,
-        left: pad + 20,
-        width: w - pad * 2 - 40,
-        fontSize: 20,
-        color: BRAND_TOKENS.DOURADO,
-        fontWeight: "bold",
-        textAlign: "center",
-      },
-      // Buy Button Base (Shape Background)
-      {
-        type: "shape",
-        paths: [
-          {
-            d: getRoundedRectPath(w - pad * 2, 48, 24),
-            fill: { color: BRAND_TOKENS.ROSA_DOCE, dropTarget: false },
-          },
-        ],
-        viewBox: { left: 0, top: 0, width: w - pad * 2, height: 48 },
-        top: 380,
-        left: pad,
-        width: w - pad * 2,
-        height: 48,
-      },
-      // Buy Button Text label
-      {
-        type: "text",
-        children: ["COMPRAR COM CUPOM"],
-        top: 395,
-        left: pad + 20,
-        width: w - pad * 2 - 40,
-        fontSize: 12,
-        color: "#FFFFFF",
-        fontWeight: "bold",
-        textAlign: "center",
-      },
-      // Secondary Link Text
-      {
-        type: "text",
-        children: ["Acessar parceiro"],
-        top: 450,
-        left: pad,
-        width: w - pad * 2,
-        fontSize: 12,
-        color: BRAND_TOKENS.CREME,
-        fontWeight: "semibold",
-        textAlign: "center",
-        decoration: "underline",
-      },
-    ];
-  },
-}));
+          ],
+          viewBox: { left: 0, top: 0, width: w, height: h },
+          top: 0,
+          left: 0,
+          width: w,
+          height: h,
+        },
+        // Header Label (Montserrat)
+        {
+          type: "text",
+          children: ["PARCEIRA PREMIUM"],
+          top: pad + 10,
+          left: pad,
+          width: w - pad * 2,
+          fontSize: 10,
+          color: BRAND_TOKENS.DOURADO,
+          fontWeight: "bold",
+          textAlign: "start",
+        },
+        // Partner Name (Johnny / Roboto Condensed)
+        {
+          type: "text",
+          children: [data.partnerName],
+          top: pad + 30,
+          left: pad,
+          width: w - pad * 2,
+          fontSize: 32,
+          color: "#FFFFFF",
+          fontWeight: "bold",
+          textAlign: "start",
+        },
+        // Partner Description
+        {
+          type: "text",
+          children: [data.description],
+          top: pad + 90,
+          left: pad,
+          width: w - pad * 2,
+          fontSize: 13,
+          color: BRAND_TOKENS.CREME,
+          fontWeight: "normal",
+          textAlign: "start",
+        },
+        // Dashed Coupon Frame (Canvas Placeholder)
+        {
+          type: "image",
+          dataUrl: dashedBorderDataUrl,
+          top: 260,
+          left: pad,
+          width: w - pad * 2,
+          height: 80,
+          altText: { text: "Cupom dashed border", decorative: true },
+        },
+        // Coupon text labels inside the frame
+        {
+          type: "text",
+          children: ["CUPOM EXCLUSIVO"],
+          top: 275,
+          left: pad + 20,
+          width: w - pad * 2 - 40,
+          fontSize: 10,
+          color: BRAND_TOKENS.CINZA_QUENTE,
+          fontWeight: "semibold",
+          textAlign: "center",
+        },
+        {
+          type: "text",
+          children: [data.code],
+          top: 295,
+          left: pad + 20,
+          width: w - pad * 2 - 40,
+          fontSize: 20,
+          color: BRAND_TOKENS.DOURADO,
+          fontWeight: "bold",
+          textAlign: "center",
+        },
+        // Buy Button Base (Shape Background)
+        {
+          type: "shape",
+          paths: [
+            {
+              d: getRoundedRectPath(w - pad * 2, 48, 24),
+              fill: { color: BRAND_TOKENS.ROSA_DOCE, dropTarget: false },
+            },
+          ],
+          viewBox: { left: 0, top: 0, width: w - pad * 2, height: 48 },
+          top: 380,
+          left: pad,
+          width: w - pad * 2,
+          height: 48,
+        },
+        // Buy Button Text label
+        {
+          type: "text",
+          children: ["COMPRAR COM CUPOM"],
+          top: 395,
+          left: pad + 20,
+          width: w - pad * 2 - 40,
+          fontSize: 12,
+          color: "#FFFFFF",
+          fontWeight: "bold",
+          textAlign: "center",
+        },
+        // Secondary Link Text
+        {
+          type: "text",
+          children: ["Acessar parceiro"],
+          top: 450,
+          left: pad,
+          width: w - pad * 2,
+          fontSize: 12,
+          color: BRAND_TOKENS.CREME,
+          fontWeight: "semibold",
+          textAlign: "center",
+          decoration: "underline",
+        },
+      ];
+    },
+  }));
 
 /**
  * -------------------------------------------------------------------------

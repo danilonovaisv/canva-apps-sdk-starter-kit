@@ -1,1 +1,0 @@
-export { LegacySearchInputMenu } from './private/search_input_menu';

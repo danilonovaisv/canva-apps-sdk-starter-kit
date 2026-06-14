@@ -1,2 +1,0 @@
-import type { TestIdsObject } from '../../../test_ids/test_ids';
-export declare const BaseInputTestIds: TestIdsObject<'wrapper' | 'textField'>;

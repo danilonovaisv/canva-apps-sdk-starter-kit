@@ -1,5 +1,0 @@
-import { createIcon } from '../icons';
-import magicGradientSvg from './icon-magic-pencil.inline.svg';
-export const MagicPencilIcon = createIcon({
-    medium: magicGradientSvg
-});

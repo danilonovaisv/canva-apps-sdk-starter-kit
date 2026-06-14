@@ -1,6 +1,0 @@
-export { ProgressBar } from './private/progress_bar';
-export type { ProgressBarProps, TrackThickness, Tone, TrackRadius } from './private/progress_bar';
-export { ProgressBarIndicator } from './private/progress_bar_indicator';
-export type { ProgressBarIndicatorProps } from './private/progress_bar_indicator';
-export { ProgressCancelButton, ProgressRetryButton } from './private/decorators';
-export type { ProgressBarActionButtonProps } from './private/decorators';

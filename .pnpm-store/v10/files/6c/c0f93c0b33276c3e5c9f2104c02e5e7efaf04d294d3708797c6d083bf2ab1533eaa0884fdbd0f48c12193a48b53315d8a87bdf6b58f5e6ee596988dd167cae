@@ -1,7 +1,0 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DismissAreaMessages = void 0;
-const strings_1 = require('../../../i18n/strings');
-exports.DismissAreaMessages = {
-    close: () => (0, strings_1.getString)("5y006Q", "Close"),
-};

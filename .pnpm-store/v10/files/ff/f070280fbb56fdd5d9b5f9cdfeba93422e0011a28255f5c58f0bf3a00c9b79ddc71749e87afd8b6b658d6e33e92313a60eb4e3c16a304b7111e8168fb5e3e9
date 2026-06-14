@@ -1,1 +1,0 @@
-export { createIcon, getGlyphAndClassForSize } from './private/icons';

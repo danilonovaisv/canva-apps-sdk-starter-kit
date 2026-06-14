@@ -1,2 +1,0 @@
-export type { EaselFlags } from './private/flags';
-export { EaselFlagsProvider, EaselHighContrastOverrideProvider, useEaselFlags, useEaselFlagsSideEffect, } from './private/flags';

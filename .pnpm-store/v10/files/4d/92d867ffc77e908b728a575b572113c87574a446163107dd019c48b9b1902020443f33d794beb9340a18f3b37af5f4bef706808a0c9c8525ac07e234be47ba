@@ -1,9 +1,0 @@
-export declare function useProgressAnimationEnd(
- { value, onProgressAnimationEnd, }: {
-     value: number
-     onProgressAnimationEnd?: (progress: number) => void
- }
-): {
-    onTransitionEnd: () => void
-};
-export declare const TRANSITION_END_TIMEOUT_MS: number;

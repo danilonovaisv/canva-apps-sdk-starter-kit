@@ -8,3 +8,5 @@
 **/*/db.json
 dist
 node_modules
+
+.pnpm-store

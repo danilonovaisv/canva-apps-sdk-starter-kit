@@ -1,4 +1,0 @@
-import { getString } from '../../../i18n/strings';
-export const DismissAreaMessages = {
-    close: () => getString("5y006Q", "Close"),
-};

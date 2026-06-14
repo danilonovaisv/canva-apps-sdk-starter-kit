@@ -1,5 +1,0 @@
-import { createIcon } from '../icons';
-import magicSvg from './icon-magic.inline.svg';
-export const MagicIcon = createIcon({
-    medium: magicSvg
-});

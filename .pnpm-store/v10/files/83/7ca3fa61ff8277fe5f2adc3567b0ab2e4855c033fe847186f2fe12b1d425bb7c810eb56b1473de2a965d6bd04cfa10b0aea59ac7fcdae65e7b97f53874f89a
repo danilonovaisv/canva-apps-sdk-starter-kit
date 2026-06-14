@@ -1,6 +1,0 @@
-export { initUserTokenVerifier } from "./user.js";
-export type {
-  UserTokenPayload,
-  UserTokenVerifier,
-  UserTokenVerifierOptions,
-} from "./types.js";

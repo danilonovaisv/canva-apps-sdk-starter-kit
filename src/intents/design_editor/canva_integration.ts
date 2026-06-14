@@ -48,7 +48,7 @@ export const TYPOGRAPHY = {
 /**
  * Retorna o Path SVG para um retângulo arredondado (Rounded Rectangle / Pill)
  */
-export function getRoundedRectPath(w, h, r) {
+export function getRoundedRectPath(w: number, h: number, r: number): string {
   // Trata limites de raio
   const radius = Math.min(r, w / 2, h / 2);
   return `M ${radius} 0 H ${w - radius} A ${radius} ${radius} 0 0 1 ${w} ${radius} V ${h - radius} A ${radius} ${radius} 0 0 1 ${w - radius} ${h} H ${radius} A ${radius} ${radius} 0 0 1 0 ${h - radius} V ${radius} A ${radius} ${radius} 0 0 1 ${radius} 0 Z`;
@@ -57,7 +57,7 @@ export function getRoundedRectPath(w, h, r) {
 /**
  * Gera um Data URL de moldura/borda dashed 1pt via canvas
  */
-export function createDashedBorderDataUrl(w, h, color) {
+export function createDashedBorderDataUrl(w: number, h: number, color: string): string {
   const canvas = document.createElement("canvas");
   canvas.width = w * 2; // High-DPI support
   canvas.height = h * 2;
@@ -77,7 +77,7 @@ export function createDashedBorderDataUrl(w, h, color) {
 /**
  * Retorna o Path de uma estrela sólida
  */
-export function getStarPath(cx, cy, r) {
+export function getStarPath(cx: number, cy: number, r: number): string {
   return "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
 }
 
@@ -88,13 +88,13 @@ export function getStarPath(cx, cy, r) {
  */
 
 // Tag / Content Badge App Element
-export const tagElementClient = initAppElement({
+export const tagElementClient = initAppElement<any>({
   render: (data) => {
     const w = 150;
     const h = 32;
     const r = 16; // Pill style
 
-    const tagColors = {
+    const tagColors: Record<string, { bg: string; text: string }> = {
       essencial: { bg: BRAND_TOKENS.AZUL_NUVEM, text: BRAND_TOKENS.AZUL_NOITE },
       alugar: { bg: BRAND_TOKENS.LILAC_WASH, text: BRAND_TOKENS.CINZA_QUENTE },
       depois: { bg: BRAND_TOKENS.ROSA_WASH, text: BRAND_TOKENS.ROSA_DOCE },
@@ -141,7 +141,7 @@ export const tagElementClient = initAppElement({
 });
 
 // CTA Buy Button App Element
-export const buyButtonClient = initAppElement({
+export const buyButtonClient = initAppElement<any>({
   render: (data) => {
     const w = 240;
     const h = 48;
@@ -157,7 +157,7 @@ export const buyButtonClient = initAppElement({
         d: getRoundedRectPath(w, h, r),
         fill: { color: bg, dropTarget: false },
         stroke: strokeColor
-          ? { weight: 2, color: strokeColor, strokeAlign: "inset" }
+          ? { weight: 2, color: strokeColor, strokeAlign: "inset" as const }
           : undefined,
       },
     ];
@@ -188,7 +188,7 @@ export const buyButtonClient = initAppElement({
 });
 
 // Premium Partner Card App Element
-export const partnerCardClient = initAppElement({
+export const partnerCardClient = initAppElement<any>({
   render: (data) => {
     const w = 400;
     const h = 550;
@@ -211,7 +211,7 @@ export const partnerCardClient = initAppElement({
             stroke: {
               weight: 1.5,
               color: BRAND_TOKENS.DOURADO,
-              strokeAlign: "inset",
+              strokeAlign: "inset" as const,
             },
           },
         ],
@@ -340,10 +340,24 @@ export const partnerCardClient = initAppElement({
  * -------------------------------------------------------------------------
  */
 
+interface TableItem {
+  name: string;
+  qty?: string;
+  tag?: string;
+  comment?: string;
+  link?: boolean;
+}
+
+interface LongTablePageParams {
+  title: string;
+  intro: string;
+  items: TableItem[];
+}
+
 /**
  * Adiciona uma página de Tabela Longa estruturada com dados do roteiro JSON
  */
-export async function addLongTablePage({ title, intro, items }) {
+export async function addLongTablePage({ title, intro, items }: LongTablePageParams): Promise<void> {
   const pageBg = BRAND_TOKENS.CREME;
   const cardBg = "#FFFFFF";
 
@@ -353,7 +367,7 @@ export async function addLongTablePage({ title, intro, items }) {
   const topMargin = 80;
   const sideMargin = 64;
 
-  const elements = [
+  const elements: any[] = [
     // Background Shape
     {
       type: "shape",
@@ -540,6 +554,14 @@ export async function addLongTablePage({ title, intro, items }) {
   });
 }
 
+interface PremiumPartnerSlideParams {
+  partnerName: string;
+  description: string;
+  discount: string;
+  code: string;
+  link: string;
+}
+
 /**
  * Adiciona uma página de Parcerias Premium em Canva Slide (1920x1080)
  */
@@ -549,11 +571,11 @@ export async function addPremiumPartnerSlide({
   discount,
   code,
   link,
-}) {
+}: PremiumPartnerSlideParams): Promise<void> {
   const pageBg = BRAND_TOKENS.AZUL_NOITE;
   const gold = BRAND_TOKENS.DOURADO;
 
-  const elements = [
+  const elements: any[] = [
     // Inset gold frame border (Moldura dourada 1pt, inset 10mm/38px)
     {
       type: "shape",
@@ -561,7 +583,7 @@ export async function addPremiumPartnerSlide({
         {
           d: getRoundedRectPath(1920 - 76, 1080 - 76, 8),
           fill: { color: "transparent", dropTarget: false },
-          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" },
+          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" as const },
         },
       ],
       viewBox: { left: 0, top: 0, width: 1920 - 76, height: 1080 - 76 },
@@ -577,7 +599,7 @@ export async function addPremiumPartnerSlide({
         {
           d: getRoundedRectPath(80, 80, 40),
           fill: { color: BRAND_TOKENS.AZUL_NOITE, dropTarget: false },
-          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" },
+          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" as const },
         },
       ],
       viewBox: { left: 0, top: 0, width: 80, height: 80 },
@@ -632,7 +654,6 @@ export async function addPremiumPartnerSlide({
       color: BRAND_TOKENS.CREME,
       textAlign: "left",
     },
-    // Placement of the coupon box & CTA button inside a custom template card side
   ];
 
   // We can add the card element directly onto the slide at the right side
@@ -656,7 +677,7 @@ export async function addPremiumPartnerSlide({
         {
           d: getRoundedRectPath(cardW, cardH, 20),
           fill: { color: BRAND_TOKENS.AZUL_NOITE, dropTarget: false },
-          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" },
+          stroke: { weight: 1.5, color: gold, strokeAlign: "inset" as const },
         },
       ],
       viewBox: { left: 0, top: 0, width: cardW, height: cardH },

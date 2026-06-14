@@ -57,7 +57,11 @@ export function getRoundedRectPath(w: number, h: number, r: number): string {
 /**
  * Gera um Data URL de moldura/borda dashed 1pt via canvas
  */
-export function createDashedBorderDataUrl(w: number, h: number, color: string): string {
+export function createDashedBorderDataUrl(
+  w: number,
+  h: number,
+  color: string,
+): string {
   const canvas = document.createElement("canvas");
   canvas.width = w * 2; // High-DPI support
   canvas.height = h * 2;
@@ -105,7 +109,10 @@ export const tagElementClient = initAppElement<any>({
       },
     };
 
-    const colors = tagColors[data.type] || tagColors.essencial;
+    const colors = (tagColors[data.type] || tagColors.essencial) as {
+      bg: string;
+      text: string;
+    };
 
     return [
       // Background Pill Shape
@@ -231,7 +238,7 @@ export const partnerCardClient = initAppElement<any>({
         fontSize: 10,
         color: BRAND_TOKENS.DOURADO,
         fontWeight: "bold",
-        textAlign: "left",
+        textAlign: "start",
       },
       // Partner Name (Johnny / Roboto Condensed)
       {
@@ -243,7 +250,7 @@ export const partnerCardClient = initAppElement<any>({
         fontSize: 32,
         color: "#FFFFFF",
         fontWeight: "bold",
-        textAlign: "left",
+        textAlign: "start",
       },
       // Partner Description
       {
@@ -255,7 +262,7 @@ export const partnerCardClient = initAppElement<any>({
         fontSize: 13,
         color: BRAND_TOKENS.CREME,
         fontWeight: "normal",
-        textAlign: "left",
+        textAlign: "start",
       },
       // Dashed Coupon Frame (Canvas Placeholder)
       {
@@ -357,7 +364,11 @@ interface LongTablePageParams {
 /**
  * Adiciona uma página de Tabela Longa estruturada com dados do roteiro JSON
  */
-export async function addLongTablePage({ title, intro, items }: LongTablePageParams): Promise<void> {
+export async function addLongTablePage({
+  title,
+  intro,
+  items,
+}: LongTablePageParams): Promise<void> {
   const pageBg = BRAND_TOKENS.CREME;
   const cardBg = "#FFFFFF";
 
@@ -393,7 +404,7 @@ export async function addLongTablePage({ title, intro, items }: LongTablePagePar
       fontSize: 32,
       color: BRAND_TOKENS.AZUL_NOITE,
       fontWeight: "bold",
-      textAlign: "left",
+      textAlign: "start",
     },
     // Page Intro Description
     {
@@ -404,7 +415,7 @@ export async function addLongTablePage({ title, intro, items }: LongTablePagePar
       width: pageW - sideMargin * 2,
       fontSize: 14,
       color: BRAND_TOKENS.CINZA_QUENTE,
-      textAlign: "left",
+      textAlign: "start",
     },
   ];
 
@@ -629,7 +640,7 @@ export async function addPremiumPartnerSlide({
       fontSize: 12,
       color: gold,
       fontWeight: "semibold",
-      textAlign: "left",
+      textAlign: "start",
     },
     // Large Brand/Partner Name Title
     {
@@ -641,7 +652,7 @@ export async function addPremiumPartnerSlide({
       fontSize: 64,
       color: "#FFFFFF",
       fontWeight: "bold",
-      textAlign: "left",
+      textAlign: "start",
     },
     // Description text paragraphs
     {
@@ -652,7 +663,7 @@ export async function addPremiumPartnerSlide({
       width: 750,
       fontSize: 18,
       color: BRAND_TOKENS.CREME,
-      textAlign: "left",
+      textAlign: "start",
     },
   ];
 

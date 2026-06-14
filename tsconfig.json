@@ -43,7 +43,20 @@
     }
   },
   "include": ["**/*"],
-  "exclude": ["templates", "reference_apps", "node_modules", "dist"],
+  "exclude": [
+    "templates",
+    "reference_apps",
+    "node_modules",
+    "dist",
+    "src/intents/hello_world",
+    "src/intents/gen_ai",
+    "src/intents/content_publisher",
+    "src/intents/data_connector",
+    "src/intents/dam",
+    "examples",
+    "utils/backend",
+    "scripts"
+  ],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"

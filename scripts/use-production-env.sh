@@ -2,5 +2,4 @@
 set -euo pipefail
 
 cp .env.production .env
-echo "Production environment applied to .env"
-cat .env
+echo "Production environment applied to .env successfully (secrets masked)."

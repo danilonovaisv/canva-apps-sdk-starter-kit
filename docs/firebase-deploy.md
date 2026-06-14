@@ -23,6 +23,8 @@ CANVA_FRONTEND_PORT=8080
 CANVA_BACKEND_PORT=3001
 CANVA_BACKEND_HOST=http://localhost:3001
 CANVA_HMR_ENABLED=true
+CANVA_CLIENT_ID=OC-AZ6R49q7qIie
+CANVA_CLIENT_SECRET=
 ```
 
 Use `.env.production` for Firebase production builds:
@@ -34,7 +36,12 @@ CANVA_FRONTEND_PORT=8080
 CANVA_BACKEND_PORT=3001
 CANVA_BACKEND_HOST=https://api.portfoliodanilo.com
 CANVA_HMR_ENABLED=false
+CANVA_CLIENT_ID=OC-AZ6R49q7qIie
+CANVA_CLIENT_SECRET=
 ```
+
+Do not store `CANVA_CLIENT_SECRET` in `.env`, `.env.local`, or
+`.env.production`. The backend reads it from Firebase Secret Manager.
 
 Apply the production environment before a production build:
 
@@ -65,6 +72,11 @@ Production routes:
 - `https://api.portfoliodanilo.com/`
 - `https://api.portfoliodanilo.com/health`
 - `https://api.portfoliodanilo.com/api/health`
+- `https://api.portfoliodanilo.com/api/oauth/start`
+- `https://api.portfoliodanilo.com/api/oauth/callback`
+- `https://api.portfoliodanilo.com/api/exports/pptx`
+- `https://api.portfoliodanilo.com/api/exports/:jobId`
+- `https://api.portfoliodanilo.com/api/oauth/revoke`
 
 Fallback validation before the custom domain is mapped:
 
@@ -81,11 +93,31 @@ The Cloud Function accepts browser CORS requests from:
 ```txt
 https://app-aahaafcfxka.canva-apps.com
 https://canva-app-5f36c.web.app
-http://localhost:8080
-https://localhost:8080
 ```
 
-Keep this list narrow. Do not allow `*` in production.
+Keep this list narrow. Do not allow `*` in production. Local origins are only
+enabled when the runtime parameter `ENABLE_LOCAL_ORIGINS` is set to `true`.
+
+## Canva Connect API secrets and params
+
+Set the rotated Canva client secret in Firebase Secret Manager:
+
+```bash
+firebase functions:secrets:set CANVA_CLIENT_SECRET --project canva-app-5f36c
+```
+
+Set or confirm runtime params during deploy:
+
+```txt
+CANVA_CLIENT_ID=OC-AZ6R49q7qIie
+CANVA_REDIRECT_URI=https://api.portfoliodanilo.com/api/oauth/callback
+CANVA_APP_ORIGIN=https://app-aahaafcfxka.canva-apps.com
+PUBLIC_FRONTEND_ORIGIN=https://canva-app-5f36c.web.app
+ENABLE_LOCAL_ORIGINS=false
+```
+
+The same redirect URI must be configured in the Canva Developer Portal for the
+Connect API integration.
 
 ## DNS
 
@@ -155,9 +187,11 @@ Manual equivalent:
 
 ```bash
 npm run env:production
+npm run security:secrets
 npm run build
 npm --prefix functions run lint
 npm --prefix functions run build
+npm --prefix functions test
 firebase deploy --only functions,hosting --project canva-app-5f36c
 ```
 
@@ -234,5 +268,7 @@ npm run deploy:functions
 - Do not enable HMR in production.
 - Do not expose secrets in frontend `.env` files; Canva app IDs and origins are
   public identifiers, not secrets.
+- Keep `CANVA_CLIENT_SECRET` only in Firebase Secret Manager and rotate it if it
+  ever appears in files, logs, or chat output.
 - Keep API routes under `/api/*` unless there is a clear reason to expose a
   top-level route like `/health`.

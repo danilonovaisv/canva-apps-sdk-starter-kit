@@ -34,6 +34,12 @@ module.exports = {
     "/dist/",
     "/templates/",
     "/reference_apps/",
+    "/scripts/start/tests/",
+    "/src/intents/content_publisher/",
+    "/src/intents/dam/",
+    "/src/intents/data_connector/",
+    "/src/intents/gen_ai/",
+    "/src/intents/hello_world/",
   ],
   setupFiles: ["<rootDir>/jest.setup.ts"],
 };

@@ -9,7 +9,8 @@
     "start:preview": "npm run start -- --preview",
     "extract": "formatjs extract \"src/**/*.{ts,tsx}\" --ignore \"src/**/*.d.ts\" --out-file dist/messages_en.json",
     "build": "webpack --config webpack.config.ts --mode production && npm run extract",
-    "build:production": "npm run env:production && npm run build",
+    "security:secrets": "bash ./scripts/check-no-canva-secrets.sh",
+    "build:production": "npm run env:production && npm run security:secrets && npm run build",
     "env:local": "bash ./scripts/use-local-env.sh",
     "env:production": "bash ./scripts/use-production-env.sh",
     "deploy:firebase": "bash ./scripts/deploy-firebase.sh",
@@ -24,7 +25,7 @@
     "format": "prettier '{examples,src,utils,scripts}/**/*.{css,ts,tsx,json,js,mjs}' --write",
     "format:check": "prettier '{examples,src,utils,scripts}/**/*.{css,ts,tsx,json,js,mjs}' --check",
     "format:file": "prettier $1 --no-config --write",
-    "test": "jest --no-cache --detectOpenHandles",
+    "test": "jest --no-cache --detectOpenHandles --passWithNoTests",
     "test:watch": "jest --no-cache --watch",
     "postinstall": "tsx ./scripts/copy_env.ts"
   },

@@ -1,4 +1,12 @@
 import canvaPlugin from "@canva/app-eslint-plugin";
+import reactPlugin from "eslint-plugin-react";
+
+const disabledReactRules = Object.fromEntries(
+  Object.keys(reactPlugin.rules).map((ruleName) => [
+    `react/${ruleName}`,
+    "off",
+  ]),
+);
 
 export default [
   {
@@ -34,6 +42,10 @@ export default [
       "examples/localization/**/*",
     ],
     ...canvaPlugin.configs.apps_i18n,
+  },
+  {
+    files: ["src/**/*"],
+    rules: disabledReactRules,
   },
   {
     files: ["src/intents/design_editor/**/*.ts", "src/intents/design_editor/**/*.tsx"],

@@ -46,10 +46,12 @@
     "@canva/intents": "^2.6.0",
     "@canva/platform": "^2.2.2",
     "@canva/user": "^2.2.0",
+    "@formatjs/intl": "2.10.4",
+    "intl-messageformat": "10.5.14",
     "mobx": "^6.16.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-intl": "^10.1.13"
+    "react-intl": "^6.6.8"
   },
   "devDependencies": {
     "@canva/app-eslint-plugin": "^1.0.0-beta.7",

@@ -91,8 +91,10 @@ export function getStarPath(cx: number, cy: number, r: number): string {
  * -------------------------------------------------------------------------
  */
 
+const g = globalThis as any;
+
 // Tag / Content Badge App Element
-export const tagElementClient = initAppElement<any>({
+export const tagElementClient = g.tagElementClient || (g.tagElementClient = initAppElement<any>({
   render: (data) => {
     const w = 150;
     const h = 32;
@@ -145,10 +147,10 @@ export const tagElementClient = initAppElement<any>({
       },
     ];
   },
-});
+}));
 
 // CTA Buy Button App Element
-export const buyButtonClient = initAppElement<any>({
+export const buyButtonClient = g.buyButtonClient || (g.buyButtonClient = initAppElement<any>({
   render: (data) => {
     const w = 240;
     const h = 48;
@@ -192,10 +194,10 @@ export const buyButtonClient = initAppElement<any>({
       },
     ];
   },
-});
+}));
 
 // Premium Partner Card App Element
-export const partnerCardClient = initAppElement<any>({
+export const partnerCardClient = g.partnerCardClient || (g.partnerCardClient = initAppElement<any>({
   render: (data) => {
     const w = 400;
     const h = 550;
@@ -339,7 +341,7 @@ export const partnerCardClient = initAppElement<any>({
       },
     ];
   },
-});
+}));
 
 /**
  * -------------------------------------------------------------------------
